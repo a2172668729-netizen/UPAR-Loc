@@ -57,6 +57,34 @@ class FromScratchTests(unittest.TestCase):
         self.assertEqual(regions.shape, (2, 5, 768))
         self.assertTrue(torch.isfinite(regions).all())
 
+    def test_unlabeled_alignment_from_synthetic_features(self):
+        from src.research_pipeline import fit_alignment
+        with TemporaryDirectory() as td:
+            root = Path(td)
+            for name, n in (("query", 12), ("gallery", 6)):
+                folder = root / name
+                folder.mkdir()
+                rng = np.random.default_rng(42 + n)
+                np.save(folder / "regions.npy",
+                        rng.normal(size=(n, 5, 768)).astype(np.float32))
+                np.save(folder / "patches.npy",
+                        np.zeros((n, 196, 768), dtype=np.float16))
+                (folder / "image_paths.json").write_text(
+                    json.dumps([f"train/{name}/{i:04d}/a.jpg" for i in range(n)]))
+            config = {"alignment": {
+                "seed": 0, "pca_dim": 4,
+                "whiten_query": 0.2, "whiten_gallery": 0.1,
+                "cap": 3, "op_updates": 1, "csls_k": 3,
+                "rank_steps": 0
+            }}
+            result = fit_alignment(root / "query", root / "gallery",
+                                   root / "descriptors.pt", config, device="cpu")
+            saved = torch.load(root / "descriptors.pt", weights_only=True)
+            self.assertFalse(saved["labels_read"])
+            self.assertEqual(saved["qv"].shape, (12, 4))
+            self.assertEqual(saved["rv"].shape, (6, 4))
+            self.assertEqual(result["op_solves"], 2)
+
     def test_tie_aware_inference_keeps_intended_candidate_order(self):
         # 同分候选 0/1 的分数相同；patch 得分应使候选 1 排到首位。
         base = torch.tensor([[3.0, 3.0, 1.0, 0.0]])
