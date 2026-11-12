@@ -198,7 +198,7 @@ def fuse_reorder_ranked(base: torch.Tensor,
     return scores, _ranking_with_candidate_tiebreak(scores, cand, target_order)
 
 
-def direct_score_fusion(base: torch.Tensor:
+def direct_score_fusion(base: torch.Tensor,
                         cand: torch.Tensor,
                         pair_score: torch.Tensor,
                         lam: float) -> torch.Tensor:
