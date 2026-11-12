@@ -1,0 +1,39 @@
+# Local environments and Python artifacts
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+build/
+dist/
+*.egg-info/
+
+# Local inputs, generated outputs and user configuration
+assets/
+data/
+datasets/
+checkpoints/
+weights/
+outputs/
+results/
+logs/
+*.local.json
+.env
+.env.*
+*.log
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.npy
+*.npz
+*.zip
+*.tar
+*.tar.gz
+*.7z
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

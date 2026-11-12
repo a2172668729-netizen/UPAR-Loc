@@ -1,0 +1,53 @@
+{
+  "evaluation": "Historically Exposed Test Compatibility Evaluation — Not a Blind Test",
+  "protocol": "Source-supervised B2; transductive V5 with unlabeled target features.",
+  "query_count": 37855,
+  "gallery_count": 951,
+  "patch_shape": [
+    196,
+    768
+  ],
+  "candidate_k": 20,
+  "lambda_j2": 1.0,
+  "v5": {
+    "cap": 55,
+    "op_updates": 4,
+    "rank_steps": 600,
+    "align": 0.0,
+    "rank_seed": 0,
+    "pca_dim": 512,
+    "whiten_q": 0.55,
+    "whiten_r": 0.1
+  },
+  "b2": {
+    "variant": "bidir",
+    "seed": 33,
+    "epoch": 7
+  },
+  "sha256": {
+    "v5_descriptors": "f811d14fb0377aa5003f91af4491dc356c0f4704b7885a1502a463f44ef8d9be",
+    "b2_checkpoint": "92a293e96aa3da8930927c0523fc630bfcbc78ceb55d9a7c08c15f7530b30d9d",
+    "query_patches": "a78d420d7c0cf80c3d99e4bb6e932dd6db20c097d3a51e3a2549fb202d073085",
+    "gallery_patches": "9f47d0007b76cc3902194cdae5cdbbc0318df49b185c95c834cb94d52453c5ee",
+    "evaluation_bundle": "af63494aadfff8be84eeae983f0ec73db78b3b4f6377ec025df8993dabb5caa5",
+    "b2_scores": "f7fad3ac425678abf29a279d5e1a62dccbf4c70b99d4fb4aea31a29e3734eb23"
+  },
+  "expected_metrics": {
+    "J0": {
+      "recall@1": 81.75405859947205,
+      "recall@5": 97.3398506641388,
+      "recall@10": 98.63426089286804,
+      "recall@20": 99.3131697177887,
+      "recall@50": 99.77545738220215,
+      "mAP": 88.78277540206909
+    },
+    "J2": {
+      "recall@1": 90.2681291103363,
+      "recall@5": 98.50746393203735,
+      "recall@10": 99.01466369628906,
+      "recall@20": 99.3131697177887,
+      "recall@50": 99.77545738220215,
+      "mAP": 94.0511167049408
+    }
+  }
+}

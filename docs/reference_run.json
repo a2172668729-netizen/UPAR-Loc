@@ -1,0 +1,47 @@
+{
+  "mode": "fresh",
+  "queries": 37855,
+  "gallery": 951,
+  "pairs": 757100,
+  "torch": "2.7.1+cu128",
+  "cuda": "12.8",
+  "gpu": "NVIDIA GeForce RTX 5060",
+  "evaluation": "Historically Exposed Test Compatibility Evaluation \u2014 Not a Blind Test",
+  "metrics": {
+    "J0": {
+      "recall@1": 81.75405859947205,
+      "recall@5": 97.3398506641388,
+      "recall@10": 98.63426089286804,
+      "recall@20": 99.3131697177887,
+      "recall@50": 99.77545738220215,
+      "mAP": 88.78277540206909
+    },
+    "J2": {
+      "recall@1": 90.2681291103363,
+      "recall@5": 98.50746393203735,
+      "recall@10": 99.01466369628906,
+      "recall@20": 99.3131697177887,
+      "recall@50": 99.77545738220215,
+      "mAP": 94.0511167049408
+    }
+  },
+  "differences_pp": {
+    "J0": {
+      "recall@1": 0.0,
+      "recall@5": 0.0,
+      "recall@10": 0.0,
+      "recall@20": 0.0,
+      "recall@50": 0.0,
+      "mAP": 0.0
+    },
+    "J2": {
+      "recall@1": 0.0,
+      "recall@5": 0.0,
+      "recall@10": 0.0,
+      "recall@20": 0.0,
+      "recall@50": 0.0,
+      "mAP": 0.0
+    }
+  },
+  "matches_reference_exactly": true
+}
