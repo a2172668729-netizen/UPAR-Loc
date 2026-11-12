@@ -1,8 +1,8 @@
 {
-  "v5_descriptors": "../../cvgl-j2-assets/test_v5.pt",
-  "b2_checkpoint": "../../cvgl-j2-assets/best.pt",
   "query_patches": "../../cvgl-j2-assets/query_patch.npy",
   "gallery_patches": "../../cvgl-j2-assets/ref_patch.npy",
   "evaluation_bundle": "../../cvgl-j2-assets/u1652_d2s_dinov3_gem_rmac_features_fp32.pt",
-  "b2_scores": "../../cvgl-j2-assets/test_b2_scores.pt"
+  "global_descriptors": "../../cvgl-j2-assets/test_v5.pt",
+  "patch_checkpoint": "../../cvgl-j2-assets/best.pt",
+  "patch_score_cache": "../../cvgl-j2-assets/test_b2_scores.pt"
 }

@@ -12,11 +12,11 @@ Two mathematically distinct operations are exposed:
 
 Tie policy
 ----------
-For every score sort in this module the primary key is score descending and the
-secondary key is the *original gallery index ascending*.  ``torch.argsort`` is
-used only as a stable primitive after a first stable sort by gallery index.
-The official CPU ``argsort`` evaluator is left untouched and is reported
-separately by the evaluation layer.
+For fused candidate reordering, use ``fuse_reorder_ranked`` to obtain an
+explicit full-gallery ranking. Primary key: score descending. Secondary key:
+desired fused candidate rank (candidate before noncandidate), then gallery id.
+The score-only ``fuse_reorder`` remains for backward compatibility but cannot
+represent rank changes among identical base scores.
 
 No function reads labels.
 """
@@ -158,7 +158,47 @@ def fuse_reorder(base: torch.Tensor,
     return reorder_from_order(base, cand, order)
 
 
-def direct_score_fusion(base: torch.Tensor,
+
+def _ranking_with_candidate_tiebreak(scores: torch.Tensor,
+                                     cand: torch.Tensor,
+                                     target_order: torch.Tensor) -> torch.Tensor:
+    """Full-gallery ranking with explicit ties (no score perturbation).
+
+    Primary key: reassigned score descending.
+    Secondary key: intended candidate position, then gallery index.
+    A selected candidate wins a tie against a non-selected gallery item,
+    including a tie at the top-K boundary.
+    """
+    n, g = scores.shape
+    k = cand.shape[1]
+    cand = cand.to(scores.device)
+    target_order = target_order.to(scores.device)
+    target_ids = cand.gather(1, target_order)
+    secondary = torch.arange(g, dtype=torch.long, device=scores.device)[None, :].expand(n, -1).clone() + k
+    secondary.scatter_(1, target_ids, torch.arange(k, dtype=torch.long, device=scores.device)[None, :].expand(n, -1))
+    by_secondary = torch.argsort(secondary, dim=1, stable=True)
+    by_score = torch.argsort(scores.gather(1, by_secondary), dim=1, descending=True, stable=True)
+    return by_secondary.gather(1, by_score)
+
+
+def fuse_reorder_ranked(base: torch.Tensor,
+                        cand: torch.Tensor,
+                        pair_score: torch.Tensor,
+                        lam: float) -> tuple[torch.Tensor, torch.Tensor]:
+    """Canonical re-ranking output: (score matrix, explicit gallery order).
+
+    The score matrix preserves the candidate base-score multiset and all
+    noncandidate scores exactly. The explicit order resolves equal-score
+    candidates (and top-K boundary ties) in the intended fused order.
+    Consumers MUST evaluate the returned order, not sort the score matrix
+    again, if exact-score ties can occur.
+    """
+    target_order, _ = fusion_target_order(base, cand, pair_score, lam)
+    scores = reorder_from_order(base, cand, target_order)
+    return scores, _ranking_with_candidate_tiebreak(scores, cand, target_order)
+
+
+def direct_score_fusion(base: torch.Tensor:
                         cand: torch.Tensor,
                         pair_score: torch.Tensor,
                         lam: float) -> torch.Tensor:

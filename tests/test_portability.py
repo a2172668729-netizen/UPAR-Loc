@@ -6,7 +6,7 @@ import unittest
 
 import torch
 
-from run_j2 import evaluate, verified_paths
+from evaluate_retrieval import evaluate, verified_paths
 
 
 class PortableEvaluationTests(unittest.TestCase):
@@ -34,6 +34,15 @@ class PortableEvaluationTests(unittest.TestCase):
         result = evaluate(scores, query_labels, gallery_labels)
         self.assertEqual(result["recall@1"], 50.0)
         self.assertAlmostEqual(result["mAP"], 100 * ((1 + 2 / 3) / 2 + 1 / 2) / 2, places=4)
+
+    def test_explicit_ranking_is_used_when_scores_are_tied(self):
+        scores = torch.tensor([[3.0, 3.0, 1.0]])
+        query_labels = torch.tensor([9])
+        gallery_labels = torch.tensor([7, 9, 7])
+        result = evaluate(scores, query_labels, gallery_labels,
+                          order=torch.tensor([[1, 0, 2]], dtype=torch.long))
+        self.assertEqual(result["recall@1"], 100.0)
+        self.assertEqual(result["mAP"], 100.0)
 
 
 if __name__ == "__main__":

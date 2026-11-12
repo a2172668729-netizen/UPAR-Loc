@@ -203,6 +203,28 @@ def test_validation_rejects_duplicate_candidates() -> None:
     raise AssertionError("duplicate candidate identities were not rejected")
 
 
+
+def test_explicit_rank_resolves_identical_candidate_scores() -> None:
+    # 原始相同分数无法仅靠 scatter 重排身份；显式排名必须按融合意图排序。
+    base = torch.tensor([[3.0, 3.0, 1.0, 0.0]])
+    cand = torch.tensor([[0, 1, 2]], dtype=torch.long)
+    pair = torch.tensor([[0.0, 3.0, -2.0]])
+    out, ranking = CR.fuse_reorder_ranked(base, cand, pair, lam=2.0)
+    assert torch.equal(out, base)
+    assert ranking.tolist() == [[1, 0, 2, 3]]
+    assert CR.audit_fusion(base, cand, out).multiset_changed == 0
+
+
+def test_candidate_wins_boundary_score_tie() -> None:
+    # gallery 1/3 与被选中的 gallery 2 同分，候选身份须优先于未选中项。
+    base = torch.tensor([[2.0, 1.0, 1.0, 1.0]])
+    cand = torch.tensor([[0, 2]], dtype=torch.long)
+    pair = torch.tensor([[1.0, 0.0]])
+    out, ranking = CR.fuse_reorder_ranked(base, cand, pair, lam=0.0)
+    assert torch.equal(out, base)
+    assert ranking.tolist() == [[0, 2, 1, 3]]
+
+
 TESTS = [
     test_three_element_cycle,
     test_historical_bug_fails_counterexample,
@@ -215,6 +237,8 @@ TESTS = [
     test_independent_reference_full_row,
     test_direct_fusion_is_a_distinct_operation,
     test_validation_rejects_duplicate_candidates,
+    test_explicit_rank_resolves_identical_candidate_scores,
+    test_candidate_wins_boundary_score_tie,
 ]
 
 
