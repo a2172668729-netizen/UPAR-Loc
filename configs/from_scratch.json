@@ -1,0 +1,32 @@
+{
+  "description": "从原始图像复现的初始冻结方案；依据源域验证记录，尚未通过独立全量复跑；不得直接宣称对应历史90.2681%",
+  "alignment": {
+    "pca_dim": 512,
+    "whiten_query": 0.55,
+    "whiten_gallery": 0.1,
+    "cap": 50,
+    "op_updates": 4,
+    "csls_k": 100,
+    "rank_steps": 600,
+    "rank_lr": 0.0003,
+    "rank_batch": 2048,
+    "rank_negatives": 8,
+    "rank_align": 0,
+    "seed": 0
+  },
+  "training": {
+    "split_seed": 20261111,
+    "seed": 33,
+    "negatives": 5,
+    "batch_size": 8,
+    "workers": 0,
+    "lr": 0.0001,
+    "weight_decay": 0.0001,
+    "grad_clip": 1,
+    "epochs": 12
+  },
+  "reranking": {
+    "topk": 20,
+    "weight": 0.6
+  }
+}

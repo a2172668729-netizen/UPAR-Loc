@@ -1,0 +1,26 @@
+name: CPU checks
+on:
+  push:
+    branches: [main, feature/raw-reproduction]
+  pull_request:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install CPU test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install torch numpy pillow --index-url https://download.pytorch.org/whl/cpu
+      - name: Python syntax
+        run: python -m compileall -q reproduce.py evaluate_retrieval.py src tests
+      - name: Existing tests
+        run: |
+          python tests/test_reranking.py
+          python -m unittest discover -s tests -p test_portability.py -v
+      - name: New source protocol tests
+        run: python -m unittest discover -s tests -p test_reproduction.py -v
