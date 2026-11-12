@@ -249,6 +249,8 @@ def train_reranker(dataset_root: Path, source_query: Path, source_gallery: Path,
     data = torch.load(descriptors_file, map_location="cpu", weights_only=True)
     if data["labels_read"] is not False:
         raise ValueError("无标签拟合资产的来源标志异常")
+    if data["cfg"] != config["alignment"]:
+        raise ValueError("源域全局描述符的拟合参数与本次配置不同，请重跑 align")
     if data["query_count"] != len(qpaths) or data["gallery_count"] != len(gpaths):
         raise ValueError("全局描述符与源域图片顺序不匹配")
     if data["query_order_sha256"] != hashlib.sha256(json.dumps(qpaths).encode()).hexdigest():
@@ -347,6 +349,8 @@ def evaluate_target(target_query: Path, target_gallery: Path, descriptors: Path,
     qpaths = read_paths(target_query)
     gpaths = read_paths(target_gallery)
     data = torch.load(descriptors, map_location="cpu", weights_only=True)
+    if data["cfg"] != config["alignment"] or data["labels_read"] is not False:
+        raise ValueError("目标域全局描述符与当前无标签对齐配置不一致")
     if data["query_count"] != len(qpaths) or data["gallery_count"] != len(gpaths):
         raise ValueError("目标域描述符与输入目录数量不符")
     if data["query_order_sha256"] != hashlib.sha256(json.dumps(qpaths).encode()).hexdigest():
@@ -356,6 +360,8 @@ def evaluate_target(target_query: Path, target_gallery: Path, descriptors: Path,
     base = data["qv"] @ data["rv"].T
     model = PatchCrossAttentionReranker().to(device)
     state = torch.load(checkpoint, map_location="cpu", weights_only=True)
+    if float(state["fusion_weight"]) != float(config["reranking"]["weight"]):
+        raise ValueError("源域选型时的融合权重与本次评测配置不同")
     model.load_state_dict(state["state_dict"])
     model.eval()
     qpatch = np.load(target_query / "patches.npy", mmap_mode="r", allow_pickle=False)
