@@ -84,6 +84,14 @@ class FromScratchTests(unittest.TestCase):
             self.assertEqual(saved["qv"].shape, (12, 4))
             self.assertEqual(saved["rv"].shape, (6, 4))
             self.assertEqual(result["op_solves"], 2)
+            # 再检查可微 Cayley 排序优化，避免只测 SVD 而漏掉训练计算图。
+            config["alignment"].update({
+                "rank_steps": 1, "rank_lr": 0.0003,
+                "rank_batch": 2, "rank_negatives": 2, "rank_align": 0.0,
+            })
+            tuned = fit_alignment(root / "query", root / "gallery",
+                                  root / "descriptors_rank.pt", config, device="cpu")
+            self.assertEqual(tuned["rank_steps"], 1)
 
     def test_tie_aware_inference_keeps_intended_candidate_order(self):
         # 同分候选 0/1 的分数相同；patch 得分应使候选 1 排到首位。
