@@ -56,7 +56,10 @@ class ReviewerSmokeTest(unittest.TestCase):
             cfg = {
                 "alignment": align,
                 "training": {
-                    "split_seed": 20261111, "seed": 33, "negatives": 2,
+                    "split_seed": 20261110, "selection_seed": 20261111,
+                    "data_seed": 20261111, "seed": 33,
+                    "negative_mining": "global_proxy_test_only",
+                    "hard_negatives": 1, "random_negatives": 1, "random_pool": 3,
                     "batch_size": 2, "workers": 0, "lr": 1e-4,
                     "weight_decay": 0.0, "grad_clip": 1.0, "epochs": 1
                 },
