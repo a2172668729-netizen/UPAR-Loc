@@ -26,3 +26,5 @@ jobs:
         run: python -m unittest discover -s tests -p test_reproduction.py -v
       - name: Reviewer full-path smoke test
         run: python -m unittest discover -s tests -p test_reviewer_smoke.py -v
+      - name: Self-contained DINOv3 and supervised source alignment checks
+        run: python -m unittest discover -s tests -p test_self_contained.py -v
