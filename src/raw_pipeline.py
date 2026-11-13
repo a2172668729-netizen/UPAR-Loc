@@ -17,7 +17,6 @@ from torch.utils.data import DataLoader, Dataset
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 
 
-
 def image_list(folder: Path) -> list[Path]:
     if not folder.is_dir():
         raise FileNotFoundError(f"未找到图片目录：{folder}")
@@ -62,7 +61,7 @@ class _Images(Dataset):
 
 def _regions_from_tokens(patch: torch.Tensor, pool: str = "gem",
                          alpha: float = 3.0) -> torch.Tensor:
-    """复刻指定版本 vfm_loc.models.DinoV3Embedder.forward 的五区域池化。"""
+    """五区域 GeM/R-MAC：全图 + 2×2 子区域，输出 5×768。"""
     b, n, c = patch.shape
     grid = int(n ** 0.5)
     if grid * grid != n:
@@ -125,11 +124,8 @@ def extract_folder(folder: Path, output: Path, weights: Path,
     offset = 0
     for batch in loader:
         batch = batch.to(device, non_blocking=True)
-        # Round 7 原始实验使用两次独立前向：区域特征来自 FP32，
-        # Patch token 来自 CUDA autocast FP16。混用 Patch 的 FP16 输出生成
-        # 区域特征会改变 PCA/OP 输入，不能宣称与历史 V5 相同。
-        # 原始 Round 7 分别使用 FP32 区域前向与 FP16 autocast Patch 前向。
-        # 区域 GeM 必须在 float32 下执行，不能使用量化后的 Patch token。
+        # Round 7 使用两次独立前向：FP32 区域 GeM 与 FP16 Patch。
+        # 用 FP16 Patch 生成区域描述符会改变后续 PCA/OP 的输入。
         fp32 = model(batch, is_training=True)
         reg = _regions_from_tokens(fp32["x_norm_patchtokens"].float())
         with torch.autocast("cuda", dtype=torch.float16, enabled=device.startswith("cuda")):
