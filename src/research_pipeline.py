@@ -242,13 +242,11 @@ def infer_reranking(model: PatchCrossAttentionReranker, base: torch.Tensor,
 
 def train_reranker(dataset_root: Path, source_query: Path, source_gallery: Path,
                    descriptors_file: Path, output: Path,
-                   config: dict, device: str = "cuda",
-                   upstream: Path | None = None) -> dict:
-    """转发到 Round 7 原始协议 B2 训练器；源域监督，目标域不读标签。"""
+                   config: dict, device: str = "cuda") -> dict:
+    """源域监督重排序；source-oracle PCA/OP 使用本仓库实现。"""
     from src.reviewer_training import train_source_reranker
     return train_source_reranker(dataset_root, source_query, source_gallery,
-                                 descriptors_file, output, config,
-                                 device=device, upstream=upstream)
+                                 descriptors_file, output, config, device=device)
 
 def evaluate_target(target_query: Path, target_gallery: Path, descriptors: Path,
                     checkpoint: Path, output: Path,
