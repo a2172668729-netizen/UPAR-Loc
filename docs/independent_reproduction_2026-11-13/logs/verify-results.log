@@ -1,0 +1,34 @@
+{
+  "status": "PASS",
+  "target_query_locations": 701,
+  "b2_wrong_to_right": 3738,
+  "b2_right_to_wrong": 844,
+  "posthoc_target_op_pairs": 36272,
+  "posthoc_target_op_pair_precision_percent": 82.91519629466255,
+  "target_gallery_locations": 951,
+  "train_target_locations_disjoint": true,
+  "satellite_exact_duplicates_cross_domain": 0,
+  "train_fit_negative_pools_verified": true,
+  "results": {
+    "global_retrieval": {
+      "recall@1": 81.6774534407608,
+      "recall@5": 97.342491084401,
+      "recall@10": 98.66860388323867,
+      "recall@20": 99.35543521331395,
+      "recall@50": 99.8018755778629,
+      "mAP": 88.73741669487228,
+      "official_trapezoidal_mAP": 85.20743506781653,
+      "top1_hits": 30919
+    },
+    "patch_reranking": {
+      "recall@1": 89.32241447629112,
+      "recall@5": 98.13234711398758,
+      "recall@10": 98.76634526482631,
+      "recall@20": 99.35543521331395,
+      "recall@50": 99.8018755778629,
+      "mAP": 93.39041719759823,
+      "official_trapezoidal_mAP": 91.35641583694469,
+      "top1_hits": 33813
+    }
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "description": "UPAR-Loc 完整复现配置：无标签跨视角对齐、源域监督 Patch 重排序及目标域 D2S 评测",
+  "description": "UPAR-Loc 验收配置：2026-11-13 已从头通过 GPU 端到端复现；历史精确指标未复现；University-1652 Test 历史暴露，非盲测。详情见 docs/independent_reproduction_2026-11-13/。",
   "alignment": {
     "pca_dim": 512,
     "whiten_query": 0.55,

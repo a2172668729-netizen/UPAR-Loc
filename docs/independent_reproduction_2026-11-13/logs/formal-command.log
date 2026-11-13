@@ -1,0 +1,2 @@
+2026-11-13T12:26:12+08:00
+/home/allen/cvgl-work/independent_reproduction_20261113/.venv/bin/python reproduce.py all --dataset /home/allen/datasets/University-1652 --weights /home/allen/cvgl-work/VFM-Loc/pretrained_weights/dinov3/dinov3_vitb16_pretrain_lvd1689m-73cec8be.pth --output /home/allen/cvgl-work/independent_reproduction_20261113/results --batch-size 4 --workers 2 --device cuda 

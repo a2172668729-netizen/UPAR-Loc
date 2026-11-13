@@ -137,6 +137,10 @@ def extract_folder(folder: Path, output: Path, weights: Path,
         regions[offset:stop] = reg.float().cpu().numpy()
         patches[offset:stop] = pt.float().cpu().numpy().astype(np.float16)
         offset = stop
+        if offset % 2000 == 0 or offset == n:
+            print(f"[extract] {folder.name} {offset}/{n}", flush=True)
+    if offset != n:
+        raise RuntimeError(f"Expected {n} images, extracted {offset}")
     regions.flush()
     patches.flush()
     order = [str(p.relative_to(folder.parent.parent)) for p in paths]

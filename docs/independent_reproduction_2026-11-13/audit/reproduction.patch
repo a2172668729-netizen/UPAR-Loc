@@ -1,0 +1,162 @@
+diff --git a/reproduce.py b/reproduce.py
+index 089c419..2903ce3 100644
+--- a/reproduce.py
++++ b/reproduce.py
+@@ -59,6 +59,10 @@ def main() -> int:
+     )
+     results = {}
+     for stage in stage_order:
++        # Training opts into TF32 internally. Each stage starts from the same
++        # FP32 settings even when it follows training in a single process.
++        torch.backends.cuda.matmul.allow_tf32 = False
++        torch.backends.cudnn.allow_tf32 = False
+         print(f"\n===== {stage.upper()} =====", flush=True)
+         if stage.startswith("extract"):
+             if args.weights is None:
+diff --git a/src/raw_pipeline.py b/src/raw_pipeline.py
+index 7797890..fe4c9da 100644
+--- a/src/raw_pipeline.py
++++ b/src/raw_pipeline.py
+@@ -137,6 +137,10 @@ def extract_folder(folder: Path, output: Path, weights: Path,
+         regions[offset:stop] = reg.float().cpu().numpy()
+         patches[offset:stop] = pt.float().cpu().numpy().astype(np.float16)
+         offset = stop
++        if offset % 2000 == 0 or offset == n:
++            print(f"[extract] {folder.name} {offset}/{n}", flush=True)
++    if offset != n:
++        raise RuntimeError(f"Expected {n} images, extracted {offset}")
+     regions.flush()
+     patches.flush()
+     order = [str(p.relative_to(folder.parent.parent)) for p in paths]
+diff --git a/src/research_pipeline.py b/src/research_pipeline.py
+index 4818236..0550a70 100644
+--- a/src/research_pipeline.py
++++ b/src/research_pipeline.py
+@@ -75,6 +75,11 @@ def fit_alignment(query_folder: Path, gallery_folder: Path, output: Path,
+         "query_order_sha256": hashlib.sha256(json.dumps(qpaths).encode()).hexdigest(),
+         "gallery_order_sha256": hashlib.sha256(json.dumps(gpaths).encode()).hexdigest(),
+         "rotation": rotation.detach().float().cpu(),
++        "op_initial_rotation": op["R"].detach().float().cpu(),
++        "op_pseudo_pairs": {key: value.cpu() for key, value in op["pairs"].items()},
++        "pca": {key: projection[key].cpu() for key in (
++            "query_mean", "query_basis", "reference_mean", "reference_basis",
++            "shared_mean", "shared_basis", "weights")},
+     }
+     torch.save(payload, output)
+     report = {
+@@ -84,6 +89,7 @@ def fit_alignment(query_folder: Path, gallery_folder: Path, output: Path,
+         "orthogonal_error": float((rotation.T @ rotation -
+                                    torch.eye(len(rotation), device=rotation.device)).abs().max()),
+         "rank_steps": 0 if tuned is None else tuned["steps"],
++        "rank_loss_trace": [] if tuned is None else tuned["losses"],
+         "test_labels_read": False,
+         "output": str(output),
+     }
+@@ -237,6 +243,9 @@ def infer_reranking(model: PatchCrossAttentionReranker, base: torch.Tensor,
+         ).float().reshape(n, k)
+         _, order = fuse_reorder_ranked(scores, candidates, pair, fusion_weight)
+         results.append(order.cpu())
++        stop = start + n
++        if stop % 2000 == 0 or stop == len(query_indices):
++            print(f"[rerank] {stop}/{len(query_indices)}", flush=True)
+     return torch.cat(results)
+ 
+ 
+@@ -280,6 +289,10 @@ def evaluate_target(target_query: Path, target_gallery: Path, descriptors: Path,
+     joint_order = infer_reranking(model, base, qpatch, gpatch, device=device,
+                                   topk=int(config["reranking"]["topk"]),
+                                   fusion_weight=selected_lambda)
++    output = Path(output)
++    output.parent.mkdir(parents=True, exist_ok=True)
++    for name, order in (("global", global_order), ("joint", joint_order)):
++        np.save(output.parent / f"{name}_ranking.npy", order.numpy().astype(np.int32))
+     # 标签只在两种排名均已生成后打开（metadata 中不保存测试标签）。
+     qlabels, glabels = image_ids(qpaths), image_ids(gpaths)
+     scores = {
+@@ -287,7 +300,7 @@ def evaluate_target(target_query: Path, target_gallery: Path, descriptors: Path,
+         "patch_reranking": metrics_from_order(joint_order, qlabels, glabels),
+     }
+     report = {
+-        "evaluation": "历史已暴露 University-1652 Test 兼容评测（不是盲测）",
++        "evaluation": "Historically Exposed Test Compatibility Evaluation — Not a Blind Test",
+         "query_count": len(qlabels), "gallery_count": len(glabels),
+         "model_epoch": state["epoch"], "seed": state["seed"],
+         "selected_lambda": selected_lambda,
+diff --git a/src/reviewer_training.py b/src/reviewer_training.py
+index 6b15823..010b3ed 100644
+--- a/src/reviewer_training.py
++++ b/src/reviewer_training.py
+@@ -7,6 +7,7 @@ from __future__ import annotations
+ 
+ import hashlib
+ import json
++import time
+ from pathlib import Path
+ 
+ import numpy as np
+@@ -202,7 +203,7 @@ def train_source_reranker(dataset_root: Path, source_query: Path,
+     tr = config["training"]
+     split = split_source_ids(qlabels, seed=int(tr.get("split_seed", 20261110)),
+                              selection_seed=int(tr.get("selection_seed", 20261111)))
+-    if len(set(split["train"]) & set(split["selection"])) or len(set(split["selection"]) & set(split["confirmation"])):
++    if sum(map(len, split.values())) != len(set().union(*split.values())):
+         raise AssertionError("源域地点拆分重叠")
+     data = torch.load(descriptors_file, map_location="cpu", weights_only=True)
+     if data["labels_read"] is not False or data["cfg"] != config["alignment"]:
+@@ -216,7 +217,18 @@ def train_source_reranker(dataset_root: Path, source_query: Path,
+     qv, gv = data["qv"].float(), data["rv"].float()
+     pools = prepare_pools(source_query, source_gallery, qlabels, glabels, split,
+                           tr, proxy_vectors=(qv, gv))
++    print(f"[train] pools ready: {len(pools['query_indices'])} queries, "
++          f"{pools['train_gallery_count']} galleries", flush=True)
+     train_idx = pools["query_indices"]
++    train_ids = set(split["train"])
++    if any(qlabels[i] not in train_ids for i in train_idx):
++        raise AssertionError("训练查询超出 Train-Fit")
++    for qi, positive, hard, random in zip(
++            train_idx, pools["positive"], pools["hard_pool"], pools["random_pool"]):
++        label = qlabels[qi]
++        if glabels[positive] != label or any(
++                glabels[j] == label or glabels[j] not in train_ids for j in (*hard, *random)):
++            raise AssertionError("训练候选的地点或行号不符合 Train-Fit 协议")
+     selection_ids = set(split["selection"])
+     confirmation_ids = set(split["confirmation"])
+     val_sel_rows = [i for i, label in enumerate(qlabels) if label in selection_ids]
+@@ -225,6 +237,10 @@ def train_source_reranker(dataset_root: Path, source_query: Path,
+         raise ValueError("源域 Val-Selection 或 Val-Confirmation 为空")
+     output = Path(output)
+     output.mkdir(parents=True, exist_ok=True)
++    pool_manifest = {key: value.tolist() if isinstance(value, np.ndarray) else value
++                     for key, value in pools.items()}
++    (output / "negative_pools.json").write_text(
++        json.dumps(pool_manifest, ensure_ascii=False), encoding="utf-8")
+     (output / "source_split.json").write_text(
+         json.dumps(split, indent=2, ensure_ascii=False), encoding="utf-8")
+     qpatch = np.load(source_query / "patches.npy", mmap_mode="r", allow_pickle=False)
+@@ -247,6 +263,8 @@ def train_source_reranker(dataset_root: Path, source_query: Path,
+             optimizer, T_max=int(tr["epochs"]))
+         run_history = []
+         for epoch in range(1, int(tr["epochs"]) + 1):
++            started = time.monotonic()
++            print(f"[train] seed={seed} epoch={epoch}/{tr['epochs']}", flush=True)
+             model.train()
+             choices = sample_epoch(pools, epoch, tr)
+             rng = np.random.RandomState(int(tr.get("data_seed", 20261111)) + epoch * 1009)
+@@ -279,6 +297,9 @@ def train_source_reranker(dataset_root: Path, source_query: Path,
+                 optimizer.step()
+                 loss_sum += float(loss.detach())
+                 batches += 1
++                if batches % 250 == 0 or batches == len(loader):
++                    print(f"[train] seed={seed} epoch={epoch} batch={batches}/{len(loader)} "
++                          f"loss={loss_sum / batches:.6f}", flush=True)
+             scheduler.step()
+             base_sel, cand, pair = score_candidates(
+                 model, base, qpatch, gpatch, val_sel_rows,
+@@ -287,6 +308,7 @@ def train_source_reranker(dataset_root: Path, source_query: Path,
+                 base_sel, cand, pair, [qlabels[i] for i in val_sel_rows],
+                 glabels, lambda_grid)
+             record = {"seed": seed, "epoch": epoch, "train_loss": loss_sum / max(1, batches),
++                      "batches": batches, "epoch_seconds": time.monotonic() - started,
+                       "selected_lambda": lam, "selection": metrics, "lambda_curve": curve}
+             run_history.append(record)
+             print(json.dumps({k: v for k, v in record.items() if k != "lambda_curve"},

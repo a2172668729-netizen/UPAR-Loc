@@ -1,0 +1,3404 @@
+
+===== EXTRACT_SOURCE =====
+[提取] source_query: /home/allen/datasets/University-1652/train/drone
+[extract] drone 2000/37854
+[extract] drone 4000/37854
+[extract] drone 6000/37854
+[extract] drone 8000/37854
+[extract] drone 10000/37854
+[extract] drone 12000/37854
+[extract] drone 14000/37854
+[extract] drone 16000/37854
+[extract] drone 18000/37854
+[extract] drone 20000/37854
+[extract] drone 22000/37854
+[extract] drone 24000/37854
+[extract] drone 26000/37854
+[extract] drone 28000/37854
+[extract] drone 30000/37854
+[extract] drone 32000/37854
+[extract] drone 34000/37854
+[extract] drone 36000/37854
+[extract] drone 37854/37854
+[提取] source_gallery: /home/allen/datasets/University-1652/train/satellite
+[extract] satellite 701/701
+{
+  "source_query": {
+    "count": 37854,
+    "image_size": 224,
+    "patch_shape": [
+      196,
+      768
+    ],
+    "region_shape": [
+      5,
+      768
+    ],
+    "model": "dinov3_vitb16",
+    "checkpoint_sha256": "73cec8be7427c8655ceced13ce62f6e20a1fa90d1b4d4a550df17a1144081a7c",
+    "dinov3_source_commit": "d51437b5e494881a204e71ee8e8a17e471fdcada",
+    "input_directory": "/home/allen/datasets/University-1652/train/drone",
+    "region_forward": "fp32 DINOv3 patch tokens + 5-region GeM",
+    "patch_forward": "autocast fp16 DINOv3 x_norm_patchtokens",
+    "note": "不包含 ID 标签；图像路径供训练和最终评测阶段单独解析"
+  },
+  "source_gallery": {
+    "count": 701,
+    "image_size": 224,
+    "patch_shape": [
+      196,
+      768
+    ],
+    "region_shape": [
+      5,
+      768
+    ],
+    "model": "dinov3_vitb16",
+    "checkpoint_sha256": "73cec8be7427c8655ceced13ce62f6e20a1fa90d1b4d4a550df17a1144081a7c",
+    "dinov3_source_commit": "d51437b5e494881a204e71ee8e8a17e471fdcada",
+    "input_directory": "/home/allen/datasets/University-1652/train/satellite",
+    "region_forward": "fp32 DINOv3 patch tokens + 5-region GeM",
+    "patch_forward": "autocast fp16 DINOv3 x_norm_patchtokens",
+    "note": "不包含 ID 标签；图像路径供训练和最终评测阶段单独解析"
+  }
+}
+
+===== ALIGN_SOURCE =====
+{
+  "query_count": 37854,
+  "gallery_count": 701,
+  "op_solves": 5,
+  "op_history": [
+    {
+      "iter": 0,
+      "pairs": 34238,
+      "orth_err": 0.0001914501190185547,
+      "gallery_used": 699,
+      "max_gallery_load": 55
+    },
+    {
+      "iter": 1,
+      "pairs": 35821,
+      "orth_err": 0.00029861927032470703,
+      "gallery_used": 699,
+      "max_gallery_load": 55
+    },
+    {
+      "iter": 2,
+      "pairs": 36245,
+      "orth_err": 0.0003764033317565918,
+      "gallery_used": 698,
+      "max_gallery_load": 55
+    },
+    {
+      "iter": 3,
+      "pairs": 36384,
+      "orth_err": 0.0003400444984436035,
+      "gallery_used": 698,
+      "max_gallery_load": 55
+    },
+    {
+      "iter": 4,
+      "pairs": 36421,
+      "orth_err": 0.00030815601348876953,
+      "gallery_used": 698,
+      "max_gallery_load": 55
+    }
+  ],
+  "orthogonal_error": 0.00022453069686889648,
+  "rank_steps": 600,
+  "rank_loss_trace": [
+    {
+      "step": 1,
+      "loss": 0.09214658290147781
+    },
+    {
+      "step": 101,
+      "loss": 0.057540301233530045
+    },
+    {
+      "step": 201,
+      "loss": 0.05274556577205658
+    },
+    {
+      "step": 301,
+      "loss": 0.05141070857644081
+    },
+    {
+      "step": 401,
+      "loss": 0.05184897407889366
+    },
+    {
+      "step": 501,
+      "loss": 0.05277547612786293
+    },
+    {
+      "step": 600,
+      "loss": 0.052262961864471436
+    }
+  ],
+  "test_labels_read": false,
+  "output": "/home/allen/cvgl-work/independent_reproduction_20261113/results/source_descriptors.pt"
+}
+
+===== TRAIN =====
+[train] pools ready: 30294 queries, 561 galleries
+[train] seed=11 epoch=1/12
+[train] seed=11 epoch=1 batch=250/1894 loss=0.451112
+[train] seed=11 epoch=1 batch=500/1894 loss=0.425788
+[train] seed=11 epoch=1 batch=750/1894 loss=0.394798
+[train] seed=11 epoch=1 batch=1000/1894 loss=0.360437
+[train] seed=11 epoch=1 batch=1250/1894 loss=0.328418
+[train] seed=11 epoch=1 batch=1500/1894 loss=0.300320
+[train] seed=11 epoch=1 batch=1750/1894 loss=0.275588
+[train] seed=11 epoch=1 batch=1894/1894 loss=0.262460
+{"seed": 11, "epoch": 1, "train_loss": 0.26245991824098414, "batches": 1894, "epoch_seconds": 243.06899304800004, "selected_lambda": 0.4, "selection": {"recall@1": 90.26455283164978, "recall@5": 99.92063641548157, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 94.86565589904785}}
+[train] seed=11 epoch=2/12
+[train] seed=11 epoch=2 batch=250/1894 loss=0.090103
+[train] seed=11 epoch=2 batch=500/1894 loss=0.086074
+[train] seed=11 epoch=2 batch=750/1894 loss=0.081231
+[train] seed=11 epoch=2 batch=1000/1894 loss=0.076831
+[train] seed=11 epoch=2 batch=1250/1894 loss=0.074108
+[train] seed=11 epoch=2 batch=1500/1894 loss=0.070984
+[train] seed=11 epoch=2 batch=1750/1894 loss=0.068715
+[train] seed=11 epoch=2 batch=1894/1894 loss=0.067500
+{"seed": 11, "epoch": 2, "train_loss": 0.06749969411571535, "batches": 1894, "epoch_seconds": 242.17266477299995, "selected_lambda": 0.8, "selection": {"recall@1": 92.59259104728699, "recall@5": 99.92063641548157, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.16063833236694}}
+[train] seed=11 epoch=3/12
+[train] seed=11 epoch=3 batch=250/1894 loss=0.043075
+[train] seed=11 epoch=3 batch=500/1894 loss=0.044839
+[train] seed=11 epoch=3 batch=750/1894 loss=0.043931
+[train] seed=11 epoch=3 batch=1000/1894 loss=0.044030
+[train] seed=11 epoch=3 batch=1250/1894 loss=0.042407
+[train] seed=11 epoch=3 batch=1500/1894 loss=0.041361
+[train] seed=11 epoch=3 batch=1750/1894 loss=0.040569
+[train] seed=11 epoch=3 batch=1894/1894 loss=0.039773
+{"seed": 11, "epoch": 3, "train_loss": 0.039772505981390587, "batches": 1894, "epoch_seconds": 241.84736056199995, "selected_lambda": 0.8, "selection": {"recall@1": 92.75132417678833, "recall@5": 99.94708895683289, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.26292586326599}}
+[train] seed=11 epoch=4/12
+[train] seed=11 epoch=4 batch=250/1894 loss=0.027695
+[train] seed=11 epoch=4 batch=500/1894 loss=0.027551
+[train] seed=11 epoch=4 batch=750/1894 loss=0.028365
+[train] seed=11 epoch=4 batch=1000/1894 loss=0.028010
+[train] seed=11 epoch=4 batch=1250/1894 loss=0.027523
+[train] seed=11 epoch=4 batch=1500/1894 loss=0.027068
+[train] seed=11 epoch=4 batch=1750/1894 loss=0.027017
+[train] seed=11 epoch=4 batch=1894/1894 loss=0.027154
+{"seed": 11, "epoch": 4, "train_loss": 0.027154353242456016, "batches": 1894, "epoch_seconds": 241.95063133299982, "selected_lambda": 0.6, "selection": {"recall@1": 92.40740537643433, "recall@5": 99.94708895683289, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.06760740280151}}
+[train] seed=11 epoch=5/12
+[train] seed=11 epoch=5 batch=250/1894 loss=0.018049
+[train] seed=11 epoch=5 batch=500/1894 loss=0.019919
+[train] seed=11 epoch=5 batch=750/1894 loss=0.019904
+[train] seed=11 epoch=5 batch=1000/1894 loss=0.019949
+[train] seed=11 epoch=5 batch=1250/1894 loss=0.019887
+[train] seed=11 epoch=5 batch=1500/1894 loss=0.019886
+[train] seed=11 epoch=5 batch=1750/1894 loss=0.019755
+[train] seed=11 epoch=5 batch=1894/1894 loss=0.019547
+{"seed": 11, "epoch": 5, "train_loss": 0.019546930622132426, "batches": 1894, "epoch_seconds": 242.27628253600005, "selected_lambda": 0.6, "selection": {"recall@1": 92.46031641960144, "recall@5": 99.89417791366577, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.07730507850647}}
+[train] seed=11 epoch=6/12
+[train] seed=11 epoch=6 batch=250/1894 loss=0.014760
+[train] seed=11 epoch=6 batch=500/1894 loss=0.014687
+[train] seed=11 epoch=6 batch=750/1894 loss=0.014773
+[train] seed=11 epoch=6 batch=1000/1894 loss=0.014205
+[train] seed=11 epoch=6 batch=1250/1894 loss=0.014607
+[train] seed=11 epoch=6 batch=1500/1894 loss=0.014633
+[train] seed=11 epoch=6 batch=1750/1894 loss=0.014548
+[train] seed=11 epoch=6 batch=1894/1894 loss=0.014558
+{"seed": 11, "epoch": 6, "train_loss": 0.014557802584563947, "batches": 1894, "epoch_seconds": 242.22787406199996, "selected_lambda": 0.8, "selection": {"recall@1": 93.06878447532654, "recall@5": 99.92063641548157, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.41372561454773}}
+[train] seed=11 epoch=7/12
+[train] seed=11 epoch=7 batch=250/1894 loss=0.010401
+[train] seed=11 epoch=7 batch=500/1894 loss=0.010907
+[train] seed=11 epoch=7 batch=750/1894 loss=0.010353
+[train] seed=11 epoch=7 batch=1000/1894 loss=0.010271
+[train] seed=11 epoch=7 batch=1250/1894 loss=0.010320
+[train] seed=11 epoch=7 batch=1500/1894 loss=0.010557
+[train] seed=11 epoch=7 batch=1750/1894 loss=0.010466
+[train] seed=11 epoch=7 batch=1894/1894 loss=0.010502
+{"seed": 11, "epoch": 7, "train_loss": 0.010501615618648732, "batches": 1894, "epoch_seconds": 242.45328086500012, "selected_lambda": 1.0, "selection": {"recall@1": 92.46031641960144, "recall@5": 99.94708895683289, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.14079594612122}}
+[train] seed=11 epoch=8/12
+[train] seed=11 epoch=8 batch=250/1894 loss=0.007359
+[train] seed=11 epoch=8 batch=500/1894 loss=0.007897
+[train] seed=11 epoch=8 batch=750/1894 loss=0.007755
+[train] seed=11 epoch=8 batch=1000/1894 loss=0.007796
+[train] seed=11 epoch=8 batch=1250/1894 loss=0.007807
+[train] seed=11 epoch=8 batch=1500/1894 loss=0.007835
+[train] seed=11 epoch=8 batch=1750/1894 loss=0.007762
+[train] seed=11 epoch=8 batch=1894/1894 loss=0.007915
+{"seed": 11, "epoch": 8, "train_loss": 0.00791520060278279, "batches": 1894, "epoch_seconds": 242.11021083900005, "selected_lambda": 0.8, "selection": {"recall@1": 92.14285612106323, "recall@5": 99.94708895683289, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 95.9776520729065}}
+[train] seed=11 epoch=9/12
+[train] seed=11 epoch=9 batch=250/1894 loss=0.005165
+[train] seed=11 epoch=9 batch=500/1894 loss=0.005640
+[train] seed=11 epoch=9 batch=750/1894 loss=0.005732
+[train] seed=11 epoch=9 batch=1000/1894 loss=0.005562
+[train] seed=11 epoch=9 batch=1250/1894 loss=0.005709
+[train] seed=11 epoch=9 batch=1500/1894 loss=0.005539
+[train] seed=11 epoch=9 batch=1750/1894 loss=0.005441
+[train] seed=11 epoch=9 batch=1894/1894 loss=0.005412
+{"seed": 11, "epoch": 9, "train_loss": 0.005412019566612151, "batches": 1894, "epoch_seconds": 239.5028067610001, "selected_lambda": 0.6, "selection": {"recall@1": 93.38624477386475, "recall@5": 99.92063641548157, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.58259153366089}}
+[train] seed=11 epoch=10/12
+[train] seed=11 epoch=10 batch=250/1894 loss=0.003352
+[train] seed=11 epoch=10 batch=500/1894 loss=0.004054
+[train] seed=11 epoch=10 batch=750/1894 loss=0.003850
+[train] seed=11 epoch=10 batch=1000/1894 loss=0.003623
+[train] seed=11 epoch=10 batch=1250/1894 loss=0.003698
+[train] seed=11 epoch=10 batch=1500/1894 loss=0.003634
+[train] seed=11 epoch=10 batch=1750/1894 loss=0.003689
+[train] seed=11 epoch=10 batch=1894/1894 loss=0.003671
+{"seed": 11, "epoch": 10, "train_loss": 0.0036709116653465728, "batches": 1894, "epoch_seconds": 242.43999031399971, "selected_lambda": 0.6, "selection": {"recall@1": 92.43386387825012, "recall@5": 99.94708895683289, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.11169099807739}}
+[train] seed=11 epoch=11/12
+[train] seed=11 epoch=11 batch=250/1894 loss=0.002721
+[train] seed=11 epoch=11 batch=500/1894 loss=0.002667
+[train] seed=11 epoch=11 batch=750/1894 loss=0.002797
+[train] seed=11 epoch=11 batch=1000/1894 loss=0.002705
+[train] seed=11 epoch=11 batch=1250/1894 loss=0.002630
+[train] seed=11 epoch=11 batch=1500/1894 loss=0.002607
+[train] seed=11 epoch=11 batch=1750/1894 loss=0.002606
+[train] seed=11 epoch=11 batch=1894/1894 loss=0.002664
+{"seed": 11, "epoch": 11, "train_loss": 0.002664047661487904, "batches": 1894, "epoch_seconds": 244.26165910500004, "selected_lambda": 0.6, "selection": {"recall@1": 92.77777671813965, "recall@5": 99.92063641548157, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.28874659538269}}
+[train] seed=11 epoch=12/12
+[train] seed=11 epoch=12 batch=250/1894 loss=0.001769
+[train] seed=11 epoch=12 batch=500/1894 loss=0.002169
+[train] seed=11 epoch=12 batch=750/1894 loss=0.002347
+[train] seed=11 epoch=12 batch=1000/1894 loss=0.002353
+[train] seed=11 epoch=12 batch=1250/1894 loss=0.002417
+[train] seed=11 epoch=12 batch=1500/1894 loss=0.002254
+[train] seed=11 epoch=12 batch=1750/1894 loss=0.002172
+[train] seed=11 epoch=12 batch=1894/1894 loss=0.002134
+{"seed": 11, "epoch": 12, "train_loss": 0.002134144423306715, "batches": 1894, "epoch_seconds": 243.6814729759999, "selected_lambda": 0.6, "selection": {"recall@1": 92.51322746276855, "recall@5": 99.92063641548157, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.14765644073486}}
+[train] seed=22 epoch=1/12
+[train] seed=22 epoch=1 batch=250/1894 loss=0.452201
+[train] seed=22 epoch=1 batch=500/1894 loss=0.436481
+[train] seed=22 epoch=1 batch=750/1894 loss=0.403051
+[train] seed=22 epoch=1 batch=1000/1894 loss=0.367190
+[train] seed=22 epoch=1 batch=1250/1894 loss=0.333446
+[train] seed=22 epoch=1 batch=1500/1894 loss=0.304244
+[train] seed=22 epoch=1 batch=1750/1894 loss=0.278962
+[train] seed=22 epoch=1 batch=1894/1894 loss=0.265566
+{"seed": 22, "epoch": 1, "train_loss": 0.26556632759043636, "batches": 1894, "epoch_seconds": 243.1275600580002, "selected_lambda": 1.0, "selection": {"recall@1": 91.1375641822815, "recall@5": 99.92063641548157, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 95.31540274620056}}
+[train] seed=22 epoch=2/12
+[train] seed=22 epoch=2 batch=250/1894 loss=0.091272
+[train] seed=22 epoch=2 batch=500/1894 loss=0.086631
+[train] seed=22 epoch=2 batch=750/1894 loss=0.080458
+[train] seed=22 epoch=2 batch=1000/1894 loss=0.075794
+[train] seed=22 epoch=2 batch=1250/1894 loss=0.073251
+[train] seed=22 epoch=2 batch=1500/1894 loss=0.070052
+[train] seed=22 epoch=2 batch=1750/1894 loss=0.067170
+[train] seed=22 epoch=2 batch=1894/1894 loss=0.065871
+{"seed": 22, "epoch": 2, "train_loss": 0.06587066435623411, "batches": 1894, "epoch_seconds": 243.33973611500005, "selected_lambda": 1.2, "selection": {"recall@1": 91.69312119483948, "recall@5": 99.92063641548157, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 95.67587375640869}}
+[train] seed=22 epoch=3/12
+[train] seed=22 epoch=3 batch=250/1894 loss=0.039434
+[train] seed=22 epoch=3 batch=500/1894 loss=0.039404
+[train] seed=22 epoch=3 batch=750/1894 loss=0.040127
+[train] seed=22 epoch=3 batch=1000/1894 loss=0.038894
+[train] seed=22 epoch=3 batch=1250/1894 loss=0.038064
+[train] seed=22 epoch=3 batch=1500/1894 loss=0.037581
+[train] seed=22 epoch=3 batch=1750/1894 loss=0.036992
+[train] seed=22 epoch=3 batch=1894/1894 loss=0.036399
+{"seed": 22, "epoch": 3, "train_loss": 0.036398995337504285, "batches": 1894, "epoch_seconds": 244.07891842299978, "selected_lambda": 0.8, "selection": {"recall@1": 92.72486567497253, "recall@5": 99.92063641548157, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.18753790855408}}
+[train] seed=22 epoch=4/12
+[train] seed=22 epoch=4 batch=250/1894 loss=0.027151
+[train] seed=22 epoch=4 batch=500/1894 loss=0.025135
+[train] seed=22 epoch=4 batch=750/1894 loss=0.025204
+[train] seed=22 epoch=4 batch=1000/1894 loss=0.025317
+[train] seed=22 epoch=4 batch=1250/1894 loss=0.025187
+[train] seed=22 epoch=4 batch=1500/1894 loss=0.024694
+[train] seed=22 epoch=4 batch=1750/1894 loss=0.024157
+[train] seed=22 epoch=4 batch=1894/1894 loss=0.024223
+{"seed": 22, "epoch": 4, "train_loss": 0.024223047299065933, "batches": 1894, "epoch_seconds": 244.27160469699993, "selected_lambda": 1.2, "selection": {"recall@1": 93.99470686912537, "recall@5": 99.94708895683289, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.8899130821228}}
+[train] seed=22 epoch=5/12
+[train] seed=22 epoch=5 batch=250/1894 loss=0.017079
+[train] seed=22 epoch=5 batch=500/1894 loss=0.018569
+[train] seed=22 epoch=5 batch=750/1894 loss=0.018048
+[train] seed=22 epoch=5 batch=1000/1894 loss=0.017864
+[train] seed=22 epoch=5 batch=1250/1894 loss=0.017471
+[train] seed=22 epoch=5 batch=1500/1894 loss=0.017771
+[train] seed=22 epoch=5 batch=1750/1894 loss=0.017682
+[train] seed=22 epoch=5 batch=1894/1894 loss=0.017675
+{"seed": 22, "epoch": 5, "train_loss": 0.01767522309539034, "batches": 1894, "epoch_seconds": 243.66312466399995, "selected_lambda": 1.2, "selection": {"recall@1": 93.59788298606873, "recall@5": 99.94708895683289, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.68620824813843}}
+[train] seed=22 epoch=6/12
+[train] seed=22 epoch=6 batch=250/1894 loss=0.011054
+[train] seed=22 epoch=6 batch=500/1894 loss=0.012482
+[train] seed=22 epoch=6 batch=750/1894 loss=0.012870
+[train] seed=22 epoch=6 batch=1000/1894 loss=0.012748
+[train] seed=22 epoch=6 batch=1250/1894 loss=0.012937
+[train] seed=22 epoch=6 batch=1500/1894 loss=0.013237
+[train] seed=22 epoch=6 batch=1750/1894 loss=0.013017
+[train] seed=22 epoch=6 batch=1894/1894 loss=0.013132
+{"seed": 22, "epoch": 6, "train_loss": 0.013131506689150965, "batches": 1894, "epoch_seconds": 242.96777736999957, "selected_lambda": 1.0, "selection": {"recall@1": 92.75132417678833, "recall@5": 99.89417791366577, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.27464413642883}}
+[train] seed=22 epoch=7/12
+[train] seed=22 epoch=7 batch=250/1894 loss=0.010053
+[train] seed=22 epoch=7 batch=500/1894 loss=0.010038
+[train] seed=22 epoch=7 batch=750/1894 loss=0.010439
+[train] seed=22 epoch=7 batch=1000/1894 loss=0.010136
+[train] seed=22 epoch=7 batch=1250/1894 loss=0.009989
+[train] seed=22 epoch=7 batch=1500/1894 loss=0.009871
+[train] seed=22 epoch=7 batch=1750/1894 loss=0.009908
+[train] seed=22 epoch=7 batch=1894/1894 loss=0.009970
+{"seed": 22, "epoch": 7, "train_loss": 0.009969903991146592, "batches": 1894, "epoch_seconds": 242.94688969400067, "selected_lambda": 1.2, "selection": {"recall@1": 94.23280358314514, "recall@5": 99.86772537231445, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.99775576591492}}
+[train] seed=22 epoch=8/12
+[train] seed=22 epoch=8 batch=250/1894 loss=0.006995
+[train] seed=22 epoch=8 batch=500/1894 loss=0.006612
+[train] seed=22 epoch=8 batch=750/1894 loss=0.006792
+[train] seed=22 epoch=8 batch=1000/1894 loss=0.007195
+[train] seed=22 epoch=8 batch=1250/1894 loss=0.007038
+[train] seed=22 epoch=8 batch=1500/1894 loss=0.006847
+[train] seed=22 epoch=8 batch=1750/1894 loss=0.006966
+[train] seed=22 epoch=8 batch=1894/1894 loss=0.007179
+{"seed": 22, "epoch": 8, "train_loss": 0.007178949357541662, "batches": 1894, "epoch_seconds": 242.34163694699964, "selected_lambda": 1.0, "selection": {"recall@1": 93.41269731521606, "recall@5": 99.94708895683289, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.57289385795593}}
+[train] seed=22 epoch=9/12
+[train] seed=22 epoch=9 batch=250/1894 loss=0.005097
+[train] seed=22 epoch=9 batch=500/1894 loss=0.004857
+[train] seed=22 epoch=9 batch=750/1894 loss=0.005157
+[train] seed=22 epoch=9 batch=1000/1894 loss=0.005121
+[train] seed=22 epoch=9 batch=1250/1894 loss=0.005246
+[train] seed=22 epoch=9 batch=1500/1894 loss=0.005080
+[train] seed=22 epoch=9 batch=1750/1894 loss=0.005116
+[train] seed=22 epoch=9 batch=1894/1894 loss=0.005203
+{"seed": 22, "epoch": 9, "train_loss": 0.005203480876736405, "batches": 1894, "epoch_seconds": 237.17386356099996, "selected_lambda": 0.8, "selection": {"recall@1": 94.20635104179382, "recall@5": 99.94708895683289, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 97.0058798789978}}
+[train] seed=22 epoch=10/12
+[train] seed=22 epoch=10 batch=250/1894 loss=0.003309
+[train] seed=22 epoch=10 batch=500/1894 loss=0.003489
+[train] seed=22 epoch=10 batch=750/1894 loss=0.003112
+[train] seed=22 epoch=10 batch=1000/1894 loss=0.003358
+[train] seed=22 epoch=10 batch=1250/1894 loss=0.003441
+[train] seed=22 epoch=10 batch=1500/1894 loss=0.003394
+[train] seed=22 epoch=10 batch=1750/1894 loss=0.003505
+[train] seed=22 epoch=10 batch=1894/1894 loss=0.003507
+{"seed": 22, "epoch": 10, "train_loss": 0.0035069153134219093, "batches": 1894, "epoch_seconds": 231.71501113399972, "selected_lambda": 0.8, "selection": {"recall@1": 93.67724657058716, "recall@5": 99.94708895683289, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.7558741569519}}
+[train] seed=22 epoch=11/12
+[train] seed=22 epoch=11 batch=250/1894 loss=0.002602
+[train] seed=22 epoch=11 batch=500/1894 loss=0.002515
+[train] seed=22 epoch=11 batch=750/1894 loss=0.002495
+[train] seed=22 epoch=11 batch=1000/1894 loss=0.002442
+[train] seed=22 epoch=11 batch=1250/1894 loss=0.002314
+[train] seed=22 epoch=11 batch=1500/1894 loss=0.002286
+[train] seed=22 epoch=11 batch=1750/1894 loss=0.002312
+[train] seed=22 epoch=11 batch=1894/1894 loss=0.002246
+{"seed": 22, "epoch": 11, "train_loss": 0.0022456263489399413, "batches": 1894, "epoch_seconds": 239.5987304119999, "selected_lambda": 0.8, "selection": {"recall@1": 93.73015761375427, "recall@5": 99.94708895683289, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.74572944641113}}
+[train] seed=22 epoch=12/12
+[train] seed=22 epoch=12 batch=250/1894 loss=0.001883
+[train] seed=22 epoch=12 batch=500/1894 loss=0.001881
+[train] seed=22 epoch=12 batch=750/1894 loss=0.001855
+[train] seed=22 epoch=12 batch=1000/1894 loss=0.001836
+[train] seed=22 epoch=12 batch=1250/1894 loss=0.001984
+[train] seed=22 epoch=12 batch=1500/1894 loss=0.001834
+[train] seed=22 epoch=12 batch=1750/1894 loss=0.001873
+[train] seed=22 epoch=12 batch=1894/1894 loss=0.001842
+{"seed": 22, "epoch": 12, "train_loss": 0.001841561874547145, "batches": 1894, "epoch_seconds": 243.06347868300054, "selected_lambda": 0.8, "selection": {"recall@1": 93.33333373069763, "recall@5": 99.94708895683289, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.55040502548218}}
+[train] seed=33 epoch=1/12
+[train] seed=33 epoch=1 batch=250/1894 loss=0.451382
+[train] seed=33 epoch=1 batch=500/1894 loss=0.419093
+[train] seed=33 epoch=1 batch=750/1894 loss=0.355701
+[train] seed=33 epoch=1 batch=1000/1894 loss=0.304107
+[train] seed=33 epoch=1 batch=1250/1894 loss=0.267596
+[train] seed=33 epoch=1 batch=1500/1894 loss=0.239298
+[train] seed=33 epoch=1 batch=1750/1894 loss=0.217096
+[train] seed=33 epoch=1 batch=1894/1894 loss=0.205847
+{"seed": 33, "epoch": 1, "train_loss": 0.2058472119447792, "batches": 1894, "epoch_seconds": 236.0399896730005, "selected_lambda": 0.8, "selection": {"recall@1": 91.08465313911438, "recall@5": 99.70899224281311, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 95.27497291564941}}
+[train] seed=33 epoch=2/12
+[train] seed=33 epoch=2 batch=250/1894 loss=0.067731
+[train] seed=33 epoch=2 batch=500/1894 loss=0.061557
+[train] seed=33 epoch=2 batch=750/1894 loss=0.058110
+[train] seed=33 epoch=2 batch=1000/1894 loss=0.055876
+[train] seed=33 epoch=2 batch=1250/1894 loss=0.054111
+[train] seed=33 epoch=2 batch=1500/1894 loss=0.052845
+[train] seed=33 epoch=2 batch=1750/1894 loss=0.051582
+[train] seed=33 epoch=2 batch=1894/1894 loss=0.051226
+{"seed": 33, "epoch": 2, "train_loss": 0.051226063400119495, "batches": 1894, "epoch_seconds": 242.25416702800067, "selected_lambda": 1.0, "selection": {"recall@1": 92.72486567497253, "recall@5": 99.84126687049866, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.1704432964325}}
+[train] seed=33 epoch=3/12
+[train] seed=33 epoch=3 batch=250/1894 loss=0.031832
+[train] seed=33 epoch=3 batch=500/1894 loss=0.034756
+[train] seed=33 epoch=3 batch=750/1894 loss=0.035246
+[train] seed=33 epoch=3 batch=1000/1894 loss=0.035996
+[train] seed=33 epoch=3 batch=1250/1894 loss=0.035521
+[train] seed=33 epoch=3 batch=1500/1894 loss=0.034804
+[train] seed=33 epoch=3 batch=1750/1894 loss=0.033988
+[train] seed=33 epoch=3 batch=1894/1894 loss=0.033601
+{"seed": 33, "epoch": 3, "train_loss": 0.03360077641446929, "batches": 1894, "epoch_seconds": 244.5416192420007, "selected_lambda": 1.0, "selection": {"recall@1": 93.04232597351074, "recall@5": 99.94708895683289, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.38859033584595}}
+[train] seed=33 epoch=4/12
+[train] seed=33 epoch=4 batch=250/1894 loss=0.027653
+[train] seed=33 epoch=4 batch=500/1894 loss=0.024426
+[train] seed=33 epoch=4 batch=750/1894 loss=0.025366
+[train] seed=33 epoch=4 batch=1000/1894 loss=0.025617
+[train] seed=33 epoch=4 batch=1250/1894 loss=0.024819
+[train] seed=33 epoch=4 batch=1500/1894 loss=0.025048
+[train] seed=33 epoch=4 batch=1750/1894 loss=0.024684
+[train] seed=33 epoch=4 batch=1894/1894 loss=0.025036
+{"seed": 33, "epoch": 4, "train_loss": 0.025036323656388994, "batches": 1894, "epoch_seconds": 241.03866857000048, "selected_lambda": 1.2, "selection": {"recall@1": 92.83068776130676, "recall@5": 99.92063641548157, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.28125429153442}}
+[train] seed=33 epoch=5/12
+[train] seed=33 epoch=5 batch=250/1894 loss=0.018965
+[train] seed=33 epoch=5 batch=500/1894 loss=0.020821
+[train] seed=33 epoch=5 batch=750/1894 loss=0.020201
+[train] seed=33 epoch=5 batch=1000/1894 loss=0.019668
+[train] seed=33 epoch=5 batch=1250/1894 loss=0.019521
+[train] seed=33 epoch=5 batch=1500/1894 loss=0.019566
+[train] seed=33 epoch=5 batch=1750/1894 loss=0.019807
+[train] seed=33 epoch=5 batch=1894/1894 loss=0.019929
+{"seed": 33, "epoch": 5, "train_loss": 0.01992855540446099, "batches": 1894, "epoch_seconds": 244.21850534999976, "selected_lambda": 1.0, "selection": {"recall@1": 92.83068776130676, "recall@5": 99.89417791366577, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.27968668937683}}
+[train] seed=33 epoch=6/12
+[train] seed=33 epoch=6 batch=250/1894 loss=0.016842
+[train] seed=33 epoch=6 batch=500/1894 loss=0.015945
+[train] seed=33 epoch=6 batch=750/1894 loss=0.015841
+[train] seed=33 epoch=6 batch=1000/1894 loss=0.015329
+[train] seed=33 epoch=6 batch=1250/1894 loss=0.015259
+[train] seed=33 epoch=6 batch=1500/1894 loss=0.015477
+[train] seed=33 epoch=6 batch=1750/1894 loss=0.015302
+[train] seed=33 epoch=6 batch=1894/1894 loss=0.014964
+{"seed": 33, "epoch": 6, "train_loss": 0.01496448355182607, "batches": 1894, "epoch_seconds": 243.9034254420003, "selected_lambda": 0.8, "selection": {"recall@1": 92.93650984764099, "recall@5": 99.94708895683289, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.35772705078125}}
+[train] seed=33 epoch=7/12
+[train] seed=33 epoch=7 batch=250/1894 loss=0.012243
+[train] seed=33 epoch=7 batch=500/1894 loss=0.011478
+[train] seed=33 epoch=7 batch=750/1894 loss=0.011596
+[train] seed=33 epoch=7 batch=1000/1894 loss=0.012019
+[train] seed=33 epoch=7 batch=1250/1894 loss=0.011847
+[train] seed=33 epoch=7 batch=1500/1894 loss=0.011815
+[train] seed=33 epoch=7 batch=1750/1894 loss=0.011749
+[train] seed=33 epoch=7 batch=1894/1894 loss=0.011966
+{"seed": 33, "epoch": 7, "train_loss": 0.011965912376883926, "batches": 1894, "epoch_seconds": 237.92973610900117, "selected_lambda": 0.8, "selection": {"recall@1": 93.67724657058716, "recall@5": 99.94708895683289, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.73691391944885}}
+[train] seed=33 epoch=8/12
+[train] seed=33 epoch=8 batch=250/1894 loss=0.008751
+[train] seed=33 epoch=8 batch=500/1894 loss=0.008460
+[train] seed=33 epoch=8 batch=750/1894 loss=0.008709
+[train] seed=33 epoch=8 batch=1000/1894 loss=0.008847
+[train] seed=33 epoch=8 batch=1250/1894 loss=0.008747
+[train] seed=33 epoch=8 batch=1500/1894 loss=0.008682
+[train] seed=33 epoch=8 batch=1750/1894 loss=0.008611
+[train] seed=33 epoch=8 batch=1894/1894 loss=0.008807
+{"seed": 33, "epoch": 8, "train_loss": 0.00880742805129711, "batches": 1894, "epoch_seconds": 243.0573504749991, "selected_lambda": 0.8, "selection": {"recall@1": 93.43915581703186, "recall@5": 99.94708895683289, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.63770198822021}}
+[train] seed=33 epoch=9/12
+[train] seed=33 epoch=9 batch=250/1894 loss=0.006099
+[train] seed=33 epoch=9 batch=500/1894 loss=0.006820
+[train] seed=33 epoch=9 batch=750/1894 loss=0.007134
+[train] seed=33 epoch=9 batch=1000/1894 loss=0.006855
+[train] seed=33 epoch=9 batch=1250/1894 loss=0.006998
+[train] seed=33 epoch=9 batch=1500/1894 loss=0.006969
+[train] seed=33 epoch=9 batch=1750/1894 loss=0.006818
+[train] seed=33 epoch=9 batch=1894/1894 loss=0.006863
+{"seed": 33, "epoch": 9, "train_loss": 0.006862739491949169, "batches": 1894, "epoch_seconds": 244.03119387600054, "selected_lambda": 0.8, "selection": {"recall@1": 93.59788298606873, "recall@5": 99.94708895683289, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.68620824813843}}
+[train] seed=33 epoch=10/12
+[train] seed=33 epoch=10 batch=250/1894 loss=0.004768
+[train] seed=33 epoch=10 batch=500/1894 loss=0.005140
+[train] seed=33 epoch=10 batch=750/1894 loss=0.004688
+[train] seed=33 epoch=10 batch=1000/1894 loss=0.004750
+[train] seed=33 epoch=10 batch=1250/1894 loss=0.004784
+[train] seed=33 epoch=10 batch=1500/1894 loss=0.004865
+[train] seed=33 epoch=10 batch=1750/1894 loss=0.004888
+[train] seed=33 epoch=10 batch=1894/1894 loss=0.004869
+{"seed": 33, "epoch": 10, "train_loss": 0.004868639634517142, "batches": 1894, "epoch_seconds": 245.04377756800022, "selected_lambda": 0.8, "selection": {"recall@1": 93.2539701461792, "recall@5": 99.92063641548157, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.52748107910156}}
+[train] seed=33 epoch=11/12
+[train] seed=33 epoch=11 batch=250/1894 loss=0.004379
+[train] seed=33 epoch=11 batch=500/1894 loss=0.004163
+[train] seed=33 epoch=11 batch=750/1894 loss=0.003950
+[train] seed=33 epoch=11 batch=1000/1894 loss=0.003721
+[train] seed=33 epoch=11 batch=1250/1894 loss=0.003494
+[train] seed=33 epoch=11 batch=1500/1894 loss=0.003541
+[train] seed=33 epoch=11 batch=1750/1894 loss=0.003594
+[train] seed=33 epoch=11 batch=1894/1894 loss=0.003589
+{"seed": 33, "epoch": 11, "train_loss": 0.0035886491774220716, "batches": 1894, "epoch_seconds": 245.6201088279995, "selected_lambda": 0.8, "selection": {"recall@1": 93.62434148788452, "recall@5": 99.94708895683289, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.7179536819458}}
+[train] seed=33 epoch=12/12
+[train] seed=33 epoch=12 batch=250/1894 loss=0.002800
+[train] seed=33 epoch=12 batch=500/1894 loss=0.002917
+[train] seed=33 epoch=12 batch=750/1894 loss=0.003103
+[train] seed=33 epoch=12 batch=1000/1894 loss=0.003033
+[train] seed=33 epoch=12 batch=1250/1894 loss=0.003023
+[train] seed=33 epoch=12 batch=1500/1894 loss=0.002866
+[train] seed=33 epoch=12 batch=1750/1894 loss=0.002880
+[train] seed=33 epoch=12 batch=1894/1894 loss=0.002870
+{"seed": 33, "epoch": 12, "train_loss": 0.0028704647122375217, "batches": 1894, "epoch_seconds": 236.54373879000013, "selected_lambda": 0.8, "selection": {"recall@1": 93.33333373069763, "recall@5": 99.94708895683289, "recall@10": 99.94708895683289, "recall@20": 99.94708895683289, "recall@50": 99.97354745864868, "mAP": 96.56804203987122}}
+{
+  "best_epoch": 7,
+  "seed": 22,
+  "selected_lambda": 1.2,
+  "selection": {
+    "recall@1": 94.23280358314514,
+    "recall@5": 99.86772537231445,
+    "recall@10": 99.94708895683289,
+    "recall@20": 99.94708895683289,
+    "recall@50": 99.97354745864868,
+    "mAP": 96.99775576591492
+  },
+  "confirmation": {
+    "recall@1": 96.37566208839417,
+    "recall@5": 99.89417791366577,
+    "recall@10": 100.0,
+    "recall@20": 100.0,
+    "recall@50": 100.0,
+    "mAP": 98.07454943656921
+  },
+  "history": [
+    {
+      "seed": 11,
+      "history": [
+        {
+          "seed": 11,
+          "epoch": 1,
+          "train_loss": 0.26245991824098414,
+          "batches": 1894,
+          "epoch_seconds": 243.06899304800004,
+          "selected_lambda": 0.4,
+          "selection": {
+            "recall@1": 90.26455283164978,
+            "recall@5": 99.92063641548157,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 94.86565589904785
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 89.73544836044312,
+              "recall@5": 99.86772537231445,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.54072117805481
+            },
+            "0.4": {
+              "recall@1": 90.26455283164978,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.86565589904785
+            },
+            "0.6": {
+              "recall@1": 90.15873074531555,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.81918215751648
+            },
+            "0.8": {
+              "recall@1": 89.99999761581421,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.76935863494873
+            },
+            "1.0": {
+              "recall@1": 89.7089958190918,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.6013331413269
+            },
+            "1.2": {
+              "recall@1": 88.8359785079956,
+              "recall@5": 99.86772537231445,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.13993954658508
+            }
+          }
+        },
+        {
+          "seed": 11,
+          "epoch": 2,
+          "train_loss": 0.06749969411571535,
+          "batches": 1894,
+          "epoch_seconds": 242.17266477299995,
+          "selected_lambda": 0.8,
+          "selection": {
+            "recall@1": 92.59259104728699,
+            "recall@5": 99.92063641548157,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.16063833236694
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 90.58201313018799,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.04933953285217
+            },
+            "0.4": {
+              "recall@1": 91.34920835494995,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.47986388206482
+            },
+            "0.6": {
+              "recall@1": 92.24867820739746,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.966637134552
+            },
+            "0.8": {
+              "recall@1": 92.59259104728699,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.16063833236694
+            },
+            "1.0": {
+              "recall@1": 92.53968000411987,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.15843296051025
+            },
+            "1.2": {
+              "recall@1": 91.82539582252502,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.7984447479248
+            }
+          }
+        },
+        {
+          "seed": 11,
+          "epoch": 3,
+          "train_loss": 0.039772505981390587,
+          "batches": 1894,
+          "epoch_seconds": 241.84736056199995,
+          "selected_lambda": 0.8,
+          "selection": {
+            "recall@1": 92.75132417678833,
+            "recall@5": 99.94708895683289,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.26292586326599
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 90.52910208702087,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.01932263374329
+            },
+            "0.4": {
+              "recall@1": 91.4550244808197,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.56035995483398
+            },
+            "0.6": {
+              "recall@1": 92.27513074874878,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.00720405578613
+            },
+            "0.8": {
+              "recall@1": 92.75132417678833,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.26292586326599
+            },
+            "1.0": {
+              "recall@1": 92.53968000411987,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.16284370422363
+            },
+            "1.2": {
+              "recall@1": 92.01058149337769,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.84318399429321
+            }
+          }
+        },
+        {
+          "seed": 11,
+          "epoch": 4,
+          "train_loss": 0.027154353242456016,
+          "batches": 1894,
+          "epoch_seconds": 241.95063133299982,
+          "selected_lambda": 0.6,
+          "selection": {
+            "recall@1": 92.40740537643433,
+            "recall@5": 99.94708895683289,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.06760740280151
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 90.55555462837219,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.04357576370239
+            },
+            "0.4": {
+              "recall@1": 91.69312119483948,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.65358757972717
+            },
+            "0.6": {
+              "recall@1": 92.40740537643433,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.06760740280151
+            },
+            "0.8": {
+              "recall@1": 92.38095283508301,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.06760740280151
+            },
+            "1.0": {
+              "recall@1": 92.0634925365448,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.91108560562134
+            },
+            "1.2": {
+              "recall@1": 92.01058149337769,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.83855271339417
+            }
+          }
+        },
+        {
+          "seed": 11,
+          "epoch": 5,
+          "train_loss": 0.019546930622132426,
+          "batches": 1894,
+          "epoch_seconds": 242.27628253600005,
+          "selected_lambda": 0.6,
+          "selection": {
+            "recall@1": 92.46031641960144,
+            "recall@5": 99.89417791366577,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.07730507850647
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 90.44973254203796,
+              "recall@5": 99.84126687049866,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.97566819190979
+            },
+            "0.4": {
+              "recall@1": 91.42857193946838,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.52773833274841
+            },
+            "0.6": {
+              "recall@1": 92.46031641960144,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.07730507850647
+            },
+            "0.8": {
+              "recall@1": 92.35450029373169,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.03981971740723
+            },
+            "1.0": {
+              "recall@1": 92.19576716423035,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.98691463470459
+            },
+            "1.2": {
+              "recall@1": 92.08994507789612,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.90667486190796
+            }
+          }
+        },
+        {
+          "seed": 11,
+          "epoch": 6,
+          "train_loss": 0.014557802584563947,
+          "batches": 1894,
+          "epoch_seconds": 242.22787406199996,
+          "selected_lambda": 0.8,
+          "selection": {
+            "recall@1": 93.06878447532654,
+            "recall@5": 99.92063641548157,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.41372561454773
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 90.8730149269104,
+              "recall@5": 99.84126687049866,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.20961046218872
+            },
+            "0.4": {
+              "recall@1": 91.87830686569214,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.75260281562805
+            },
+            "0.6": {
+              "recall@1": 92.85714030265808,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.27994298934937
+            },
+            "0.8": {
+              "recall@1": 93.06878447532654,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.41372561454773
+            },
+            "1.0": {
+              "recall@1": 92.80423521995544,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.29467129707336
+            },
+            "1.2": {
+              "recall@1": 92.51322746276855,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.16681337356567
+            }
+          }
+        },
+        {
+          "seed": 11,
+          "epoch": 7,
+          "train_loss": 0.010501615618648732,
+          "batches": 1894,
+          "epoch_seconds": 242.45328086500012,
+          "selected_lambda": 1.0,
+          "selection": {
+            "recall@1": 92.46031641960144,
+            "recall@5": 99.94708895683289,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.14079594612122
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 90.52910208702087,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.04845142364502
+            },
+            "0.4": {
+              "recall@1": 91.7989432811737,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.72544693946838
+            },
+            "0.6": {
+              "recall@1": 92.3280417919159,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.0292398929596
+            },
+            "0.8": {
+              "recall@1": 92.22221970558167,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.00499272346497
+            },
+            "1.0": {
+              "recall@1": 92.46031641960144,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.14079594612122
+            },
+            "1.2": {
+              "recall@1": 92.22221970558167,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.01292610168457
+            }
+          }
+        },
+        {
+          "seed": 11,
+          "epoch": 8,
+          "train_loss": 0.00791520060278279,
+          "batches": 1894,
+          "epoch_seconds": 242.11021083900005,
+          "selected_lambda": 0.8,
+          "selection": {
+            "recall@1": 92.14285612106323,
+            "recall@5": 99.94708895683289,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 95.9776520729065
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 90.42328000068665,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.98672485351562
+            },
+            "0.4": {
+              "recall@1": 91.4814829826355,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.57554125785828
+            },
+            "0.6": {
+              "recall@1": 92.08994507789612,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.92474102973938
+            },
+            "0.8": {
+              "recall@1": 92.14285612106323,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.9776520729065
+            },
+            "1.0": {
+              "recall@1": 91.93121790885925,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.86521983146667
+            },
+            "1.2": {
+              "recall@1": 91.74603223800659,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.74617743492126
+            }
+          }
+        },
+        {
+          "seed": 11,
+          "epoch": 9,
+          "train_loss": 0.005412019566612151,
+          "batches": 1894,
+          "epoch_seconds": 239.5028067610001,
+          "selected_lambda": 0.6,
+          "selection": {
+            "recall@1": 93.38624477386475,
+            "recall@5": 99.92063641548157,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.58259153366089
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 91.4550244808197,
+              "recall@5": 99.84126687049866,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.53698897361755
+            },
+            "0.4": {
+              "recall@1": 92.53968000411987,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.14475965499878
+            },
+            "0.6": {
+              "recall@1": 93.38624477386475,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.58259153366089
+            },
+            "0.8": {
+              "recall@1": 93.33333373069763,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.57377004623413
+            },
+            "1.0": {
+              "recall@1": 92.69841313362122,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.22986316680908
+            },
+            "1.2": {
+              "recall@1": 92.46031641960144,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.07245326042175
+            }
+          }
+        },
+        {
+          "seed": 11,
+          "epoch": 10,
+          "train_loss": 0.0036709116653465728,
+          "batches": 1894,
+          "epoch_seconds": 242.43999031399971,
+          "selected_lambda": 0.6,
+          "selection": {
+            "recall@1": 92.43386387825012,
+            "recall@5": 99.94708895683289,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.11169099807739
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 91.16402268409729,
+              "recall@5": 99.86772537231445,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.38134932518005
+            },
+            "0.4": {
+              "recall@1": 92.08994507789612,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.91107964515686
+            },
+            "0.6": {
+              "recall@1": 92.43386387825012,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.11169099807739
+            },
+            "0.8": {
+              "recall@1": 92.3280417919159,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.0742175579071
+            },
+            "1.0": {
+              "recall@1": 91.69312119483948,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.7655668258667
+            },
+            "1.2": {
+              "recall@1": 91.37566089630127,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.57068943977356
+            }
+          }
+        },
+        {
+          "seed": 11,
+          "epoch": 11,
+          "train_loss": 0.002664047661487904,
+          "batches": 1894,
+          "epoch_seconds": 244.26165910500004,
+          "selected_lambda": 0.6,
+          "selection": {
+            "recall@1": 92.77777671813965,
+            "recall@5": 99.92063641548157,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.28874659538269
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 91.37566089630127,
+              "recall@5": 99.86772537231445,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.48874497413635
+            },
+            "0.4": {
+              "recall@1": 92.0634925365448,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.89502215385437
+            },
+            "0.6": {
+              "recall@1": 92.77777671813965,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.28874659538269
+            },
+            "0.8": {
+              "recall@1": 92.48677492141724,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.15269899368286
+            },
+            "1.0": {
+              "recall@1": 91.93121790885925,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.86836695671082
+            },
+            "1.2": {
+              "recall@1": 91.4550244808197,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.5729603767395
+            }
+          }
+        },
+        {
+          "seed": 11,
+          "epoch": 12,
+          "train_loss": 0.002134144423306715,
+          "batches": 1894,
+          "epoch_seconds": 243.6814729759999,
+          "selected_lambda": 0.6,
+          "selection": {
+            "recall@1": 92.51322746276855,
+            "recall@5": 99.92063641548157,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.14765644073486
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 91.34920835494995,
+              "recall@5": 99.86772537231445,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.46670317649841
+            },
+            "0.4": {
+              "recall@1": 92.03703999519348,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.87737321853638
+            },
+            "0.6": {
+              "recall@1": 92.51322746276855,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.14765644073486
+            },
+            "0.8": {
+              "recall@1": 92.14285612106323,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.98451256752014
+            },
+            "1.0": {
+              "recall@1": 91.53439402580261,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.65248489379883
+            },
+            "1.2": {
+              "recall@1": 91.19047522544861,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.43642997741699
+            }
+          }
+        }
+      ]
+    },
+    {
+      "seed": 22,
+      "history": [
+        {
+          "seed": 22,
+          "epoch": 1,
+          "train_loss": 0.26556632759043636,
+          "batches": 1894,
+          "epoch_seconds": 243.1275600580002,
+          "selected_lambda": 1.0,
+          "selection": {
+            "recall@1": 91.1375641822815,
+            "recall@5": 99.92063641548157,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 95.31540274620056
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 89.99999761581421,
+              "recall@5": 99.81481432914734,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.67878937721252
+            },
+            "0.4": {
+              "recall@1": 90.58201313018799,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.02483606338501
+            },
+            "0.6": {
+              "recall@1": 90.63491821289062,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.06628513336182
+            },
+            "0.8": {
+              "recall@1": 90.92592597007751,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.22324204444885
+            },
+            "1.0": {
+              "recall@1": 91.1375641822815,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.31540274620056
+            },
+            "1.2": {
+              "recall@1": 90.63491821289062,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.02174854278564
+            }
+          }
+        },
+        {
+          "seed": 22,
+          "epoch": 2,
+          "train_loss": 0.06587066435623411,
+          "batches": 1894,
+          "epoch_seconds": 243.33973611500005,
+          "selected_lambda": 1.2,
+          "selection": {
+            "recall@1": 91.69312119483948,
+            "recall@5": 99.92063641548157,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 95.67587375640869
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 89.94709253311157,
+              "recall@5": 99.84126687049866,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.67925429344177
+            },
+            "0.4": {
+              "recall@1": 90.39682745933533,
+              "recall@5": 99.86772537231445,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.96994614601135
+            },
+            "0.6": {
+              "recall@1": 91.11111164093018,
+              "recall@5": 99.86772537231445,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.3447163105011
+            },
+            "0.8": {
+              "recall@1": 91.32274985313416,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.47059535980225
+            },
+            "1.0": {
+              "recall@1": 91.56084656715393,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.61919569969177
+            },
+            "1.2": {
+              "recall@1": 91.69312119483948,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.67587375640869
+            }
+          }
+        },
+        {
+          "seed": 22,
+          "epoch": 3,
+          "train_loss": 0.036398995337504285,
+          "batches": 1894,
+          "epoch_seconds": 244.07891842299978,
+          "selected_lambda": 0.8,
+          "selection": {
+            "recall@1": 92.72486567497253,
+            "recall@5": 99.92063641548157,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.18753790855408
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 90.47619104385376,
+              "recall@5": 99.86772537231445,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.94814872741699
+            },
+            "0.4": {
+              "recall@1": 91.56084656715393,
+              "recall@5": 99.86772537231445,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.5394446849823
+            },
+            "0.6": {
+              "recall@1": 92.35450029373169,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.98011374473572
+            },
+            "0.8": {
+              "recall@1": 92.72486567497253,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.18753790855408
+            },
+            "1.0": {
+              "recall@1": 92.59259104728699,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.14697098731995
+            },
+            "1.2": {
+              "recall@1": 92.38095283508301,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.03742361068726
+            }
+          }
+        },
+        {
+          "seed": 22,
+          "epoch": 4,
+          "train_loss": 0.024223047299065933,
+          "batches": 1894,
+          "epoch_seconds": 244.27160469699993,
+          "selected_lambda": 1.2,
+          "selection": {
+            "recall@1": 93.99470686912537,
+            "recall@5": 99.94708895683289,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.8899130821228
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 90.97883701324463,
+              "recall@5": 99.84126687049866,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.23739218711853
+            },
+            "0.4": {
+              "recall@1": 92.16931462287903,
+              "recall@5": 99.86772537231445,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.9013819694519
+            },
+            "0.6": {
+              "recall@1": 93.2275116443634,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.46222591400146
+            },
+            "0.8": {
+              "recall@1": 93.65079402923584,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.69150114059448
+            },
+            "1.0": {
+              "recall@1": 93.91534328460693,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.84450030326843
+            },
+            "1.2": {
+              "recall@1": 93.99470686912537,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.8899130821228
+            }
+          }
+        },
+        {
+          "seed": 22,
+          "epoch": 5,
+          "train_loss": 0.01767522309539034,
+          "batches": 1894,
+          "epoch_seconds": 243.66312466399995,
+          "selected_lambda": 1.2,
+          "selection": {
+            "recall@1": 93.59788298606873,
+            "recall@5": 99.94708895683289,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.68620824813843
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 90.8730149269104,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.21159529685974
+            },
+            "0.4": {
+              "recall@1": 92.11640357971191,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.91327905654907
+            },
+            "0.6": {
+              "recall@1": 92.80423521995544,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.29070162773132
+            },
+            "0.8": {
+              "recall@1": 93.2539701461792,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.54202461242676
+            },
+            "1.0": {
+              "recall@1": 93.33333373069763,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.59053087234497
+            },
+            "1.2": {
+              "recall@1": 93.59788298606873,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.68620824813843
+            }
+          }
+        },
+        {
+          "seed": 22,
+          "epoch": 6,
+          "train_loss": 0.013131506689150965,
+          "batches": 1894,
+          "epoch_seconds": 242.96777736999957,
+          "selected_lambda": 1.0,
+          "selection": {
+            "recall@1": 92.75132417678833,
+            "recall@5": 99.89417791366577,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.27464413642883
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 90.66137671470642,
+              "recall@5": 99.84126687049866,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.07378339767456
+            },
+            "0.4": {
+              "recall@1": 91.50793552398682,
+              "recall@5": 99.86772537231445,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.57762145996094
+            },
+            "0.6": {
+              "recall@1": 92.30158925056458,
+              "recall@5": 99.86772537231445,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.99906206130981
+            },
+            "0.8": {
+              "recall@1": 92.38095283508301,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.08372449874878
+            },
+            "1.0": {
+              "recall@1": 92.75132417678833,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.27464413642883
+            },
+            "1.2": {
+              "recall@1": 92.59259104728699,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.16529941558838
+            }
+          }
+        },
+        {
+          "seed": 22,
+          "epoch": 7,
+          "train_loss": 0.009969903991146592,
+          "batches": 1894,
+          "epoch_seconds": 242.94688969400067,
+          "selected_lambda": 1.2,
+          "selection": {
+            "recall@1": 94.23280358314514,
+            "recall@5": 99.86772537231445,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.99775576591492
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 91.19047522544861,
+              "recall@5": 99.84126687049866,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.37668824195862
+            },
+            "0.4": {
+              "recall@1": 92.51322746276855,
+              "recall@5": 99.86772537231445,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.08151912689209
+            },
+            "0.6": {
+              "recall@1": 93.8095211982727,
+              "recall@5": 99.86772537231445,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.77130579948425
+            },
+            "0.8": {
+              "recall@1": 94.1005289554596,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.93664908409119
+            },
+            "1.0": {
+              "recall@1": 94.20635104179382,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.9860315322876
+            },
+            "1.2": {
+              "recall@1": 94.23280358314514,
+              "recall@5": 99.86772537231445,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.99775576591492
+            }
+          }
+        },
+        {
+          "seed": 22,
+          "epoch": 8,
+          "train_loss": 0.007178949357541662,
+          "batches": 1894,
+          "epoch_seconds": 242.34163694699964,
+          "selected_lambda": 1.0,
+          "selection": {
+            "recall@1": 93.41269731521606,
+            "recall@5": 99.94708895683289,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.57289385795593
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 90.8730149269104,
+              "recall@5": 99.84126687049866,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.19660472869873
+            },
+            "0.4": {
+              "recall@1": 91.98412895202637,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.8264172077179
+            },
+            "0.6": {
+              "recall@1": 92.75132417678833,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.2254524230957
+            },
+            "0.8": {
+              "recall@1": 93.33333373069763,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.53276205062866
+            },
+            "1.0": {
+              "recall@1": 93.41269731521606,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.57289385795593
+            },
+            "1.2": {
+              "recall@1": 93.41269731521606,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.56408429145813
+            }
+          }
+        },
+        {
+          "seed": 22,
+          "epoch": 9,
+          "train_loss": 0.005203480876736405,
+          "batches": 1894,
+          "epoch_seconds": 237.17386356099996,
+          "selected_lambda": 0.8,
+          "selection": {
+            "recall@1": 94.20635104179382,
+            "recall@5": 99.94708895683289,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 97.0058798789978
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 91.08465313911438,
+              "recall@5": 99.84126687049866,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.31282186508179
+            },
+            "0.4": {
+              "recall@1": 92.48677492141724,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.08392119407654
+            },
+            "0.6": {
+              "recall@1": 93.67724657058716,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.73029780387878
+            },
+            "0.8": {
+              "recall@1": 94.20635104179382,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 97.0058798789978
+            },
+            "1.0": {
+              "recall@1": 93.8359797000885,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.82949781417847
+            },
+            "1.2": {
+              "recall@1": 93.4920608997345,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.6500461101532
+            }
+          }
+        },
+        {
+          "seed": 22,
+          "epoch": 10,
+          "train_loss": 0.0035069153134219093,
+          "batches": 1894,
+          "epoch_seconds": 231.71501113399972,
+          "selected_lambda": 0.8,
+          "selection": {
+            "recall@1": 93.67724657058716,
+            "recall@5": 99.94708895683289,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.7558741569519
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 91.16402268409729,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.36371231079102
+            },
+            "0.4": {
+              "recall@1": 92.40740537643433,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.05525732040405
+            },
+            "0.6": {
+              "recall@1": 93.12169551849365,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.44370675086975
+            },
+            "0.8": {
+              "recall@1": 93.67724657058716,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.7558741569519
+            },
+            "1.0": {
+              "recall@1": 93.33333373069763,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.57509326934814
+            },
+            "1.2": {
+              "recall@1": 93.17460060119629,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.48691415786743
+            }
+          }
+        },
+        {
+          "seed": 22,
+          "epoch": 11,
+          "train_loss": 0.0022456263489399413,
+          "batches": 1894,
+          "epoch_seconds": 239.5987304119999,
+          "selected_lambda": 0.8,
+          "selection": {
+            "recall@1": 93.73015761375427,
+            "recall@5": 99.94708895683289,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.74572944641113
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 91.19047522544861,
+              "recall@5": 99.86772537231445,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.3716516494751
+            },
+            "0.4": {
+              "recall@1": 92.46031641960144,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.07068300247192
+            },
+            "0.6": {
+              "recall@1": 93.4920608997345,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.6112494468689
+            },
+            "0.8": {
+              "recall@1": 93.73015761375427,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.74572944641113
+            },
+            "1.0": {
+              "recall@1": 93.38624477386475,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.57509922981262
+            },
+            "1.2": {
+              "recall@1": 93.28042268753052,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.53099775314331
+            }
+          }
+        },
+        {
+          "seed": 22,
+          "epoch": 12,
+          "train_loss": 0.001841561874547145,
+          "batches": 1894,
+          "epoch_seconds": 243.06347868300054,
+          "selected_lambda": 0.8,
+          "selection": {
+            "recall@1": 93.33333373069763,
+            "recall@5": 99.94708895683289,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.55040502548218
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 91.34920835494995,
+              "recall@5": 99.84126687049866,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.44509649276733
+            },
+            "0.4": {
+              "recall@1": 92.48677492141724,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.09714150428772
+            },
+            "0.6": {
+              "recall@1": 93.2275116443634,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.48778438568115
+            },
+            "0.8": {
+              "recall@1": 93.33333373069763,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.55040502548218
+            },
+            "1.0": {
+              "recall@1": 93.2539701461792,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.5208649635315
+            },
+            "1.2": {
+              "recall@1": 92.93650984764099,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.36434316635132
+            }
+          }
+        }
+      ]
+    },
+    {
+      "seed": 33,
+      "history": [
+        {
+          "seed": 33,
+          "epoch": 1,
+          "train_loss": 0.2058472119447792,
+          "batches": 1894,
+          "epoch_seconds": 236.0399896730005,
+          "selected_lambda": 0.8,
+          "selection": {
+            "recall@1": 91.08465313911438,
+            "recall@5": 99.70899224281311,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 95.27497291564941
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 90.18518328666687,
+              "recall@5": 99.81481432914734,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.77099180221558
+            },
+            "0.4": {
+              "recall@1": 90.66137671470642,
+              "recall@5": 99.84126687049866,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.03304958343506
+            },
+            "0.6": {
+              "recall@1": 90.97883701324463,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.20571231842041
+            },
+            "0.8": {
+              "recall@1": 91.08465313911438,
+              "recall@5": 99.70899224281311,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.27497291564941
+            },
+            "1.0": {
+              "recall@1": 90.8730149269104,
+              "recall@5": 99.70899224281311,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.16058564186096
+            },
+            "1.2": {
+              "recall@1": 90.82010388374329,
+              "recall@5": 99.70899224281311,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.11556625366211
+            }
+          }
+        },
+        {
+          "seed": 33,
+          "epoch": 2,
+          "train_loss": 0.051226063400119495,
+          "batches": 1894,
+          "epoch_seconds": 242.25416702800067,
+          "selected_lambda": 1.0,
+          "selection": {
+            "recall@1": 92.72486567497253,
+            "recall@5": 99.84126687049866,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.1704432964325
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 90.6084656715393,
+              "recall@5": 99.84126687049866,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.03654837608337
+            },
+            "0.4": {
+              "recall@1": 91.4814829826355,
+              "recall@5": 99.86772537231445,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.50505876541138
+            },
+            "0.6": {
+              "recall@1": 92.14285612106323,
+              "recall@5": 99.86772537231445,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.86954116821289
+            },
+            "0.8": {
+              "recall@1": 92.61904954910278,
+              "recall@5": 99.84126687049866,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.11117839813232
+            },
+            "1.0": {
+              "recall@1": 92.72486567497253,
+              "recall@5": 99.84126687049866,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.1704432964325
+            },
+            "1.2": {
+              "recall@1": 92.69841313362122,
+              "recall@5": 99.84126687049866,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.13737463951111
+            }
+          }
+        },
+        {
+          "seed": 33,
+          "epoch": 3,
+          "train_loss": 0.03360077641446929,
+          "batches": 1894,
+          "epoch_seconds": 244.5416192420007,
+          "selected_lambda": 1.0,
+          "selection": {
+            "recall@1": 93.04232597351074,
+            "recall@5": 99.94708895683289,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.38859033584595
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 90.63491821289062,
+              "recall@5": 99.84126687049866,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.04783153533936
+            },
+            "0.4": {
+              "recall@1": 91.77248477935791,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.68224549293518
+            },
+            "0.6": {
+              "recall@1": 92.51322746276855,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.09890580177307
+            },
+            "0.8": {
+              "recall@1": 92.77777671813965,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.25189900398254
+            },
+            "1.0": {
+              "recall@1": 93.04232597351074,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.38859033584595
+            },
+            "1.2": {
+              "recall@1": 92.75132417678833,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.21883630752563
+            }
+          }
+        },
+        {
+          "seed": 33,
+          "epoch": 4,
+          "train_loss": 0.025036323656388994,
+          "batches": 1894,
+          "epoch_seconds": 241.03866857000048,
+          "selected_lambda": 1.2,
+          "selection": {
+            "recall@1": 92.83068776130676,
+            "recall@5": 99.92063641548157,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.28125429153442
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 90.42328000068665,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.96093392372131
+            },
+            "0.4": {
+              "recall@1": 91.34920835494995,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.48099637031555
+            },
+            "0.6": {
+              "recall@1": 91.95767045021057,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.83461284637451
+            },
+            "0.8": {
+              "recall@1": 92.3280417919159,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.02861404418945
+            },
+            "1.0": {
+              "recall@1": 92.6719605922699,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.21512293815613
+            },
+            "1.2": {
+              "recall@1": 92.83068776130676,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.28125429153442
+            }
+          }
+        },
+        {
+          "seed": 33,
+          "epoch": 5,
+          "train_loss": 0.01992855540446099,
+          "batches": 1894,
+          "epoch_seconds": 244.21850534999976,
+          "selected_lambda": 1.0,
+          "selection": {
+            "recall@1": 92.83068776130676,
+            "recall@5": 99.89417791366577,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.27968668937683
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 90.50264358520508,
+              "recall@5": 99.86772537231445,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.00617980957031
+            },
+            "0.4": {
+              "recall@1": 91.42857193946838,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.52439451217651
+            },
+            "0.6": {
+              "recall@1": 92.22221970558167,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.9631085395813
+            },
+            "0.8": {
+              "recall@1": 92.6719605922699,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.20630741119385
+            },
+            "1.0": {
+              "recall@1": 92.83068776130676,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.27968668937683
+            },
+            "1.2": {
+              "recall@1": 92.75132417678833,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.22986316680908
+            }
+          }
+        },
+        {
+          "seed": 33,
+          "epoch": 6,
+          "train_loss": 0.01496448355182607,
+          "batches": 1894,
+          "epoch_seconds": 243.9034254420003,
+          "selected_lambda": 0.8,
+          "selection": {
+            "recall@1": 92.93650984764099,
+            "recall@5": 99.94708895683289,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.35772705078125
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 90.71428775787354,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.14350295066833
+            },
+            "0.4": {
+              "recall@1": 91.69312119483948,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.6888496875763
+            },
+            "0.6": {
+              "recall@1": 92.43386387825012,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.09449505805969
+            },
+            "0.8": {
+              "recall@1": 92.93650984764099,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.35772705078125
+            },
+            "1.0": {
+              "recall@1": 92.80423521995544,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.29731774330139
+            },
+            "1.2": {
+              "recall@1": 92.80423521995544,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.2951123714447
+            }
+          }
+        },
+        {
+          "seed": 33,
+          "epoch": 7,
+          "train_loss": 0.011965912376883926,
+          "batches": 1894,
+          "epoch_seconds": 237.92973610900117,
+          "selected_lambda": 0.8,
+          "selection": {
+            "recall@1": 93.67724657058716,
+            "recall@5": 99.94708895683289,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.73691391944885
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 91.34920835494995,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.4785943031311
+            },
+            "0.4": {
+              "recall@1": 92.53968000411987,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.13197445869446
+            },
+            "0.6": {
+              "recall@1": 93.43915581703186,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.6112494468689
+            },
+            "0.8": {
+              "recall@1": 93.67724657058716,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.73691391944885
+            },
+            "1.0": {
+              "recall@1": 93.59788298606873,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.69855833053589
+            },
+            "1.2": {
+              "recall@1": 92.93650984764099,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.3414192199707
+            }
+          }
+        },
+        {
+          "seed": 33,
+          "epoch": 8,
+          "train_loss": 0.00880742805129711,
+          "batches": 1894,
+          "epoch_seconds": 243.0573504749991,
+          "selected_lambda": 0.8,
+          "selection": {
+            "recall@1": 93.43915581703186,
+            "recall@5": 99.94708895683289,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.63770198822021
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 91.11111164093018,
+              "recall@5": 99.86772537231445,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.35400867462158
+            },
+            "0.4": {
+              "recall@1": 92.22221970558167,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.97722291946411
+            },
+            "0.6": {
+              "recall@1": 93.14814805984497,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.46795392036438
+            },
+            "0.8": {
+              "recall@1": 93.43915581703186,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.63770198822021
+            },
+            "1.0": {
+              "recall@1": 93.28042268753052,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.56714797019958
+            },
+            "1.2": {
+              "recall@1": 93.06878447532654,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.45252227783203
+            }
+          }
+        },
+        {
+          "seed": 33,
+          "epoch": 9,
+          "train_loss": 0.006862739491949169,
+          "batches": 1894,
+          "epoch_seconds": 244.03119387600054,
+          "selected_lambda": 0.8,
+          "selection": {
+            "recall@1": 93.59788298606873,
+            "recall@5": 99.94708895683289,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.68620824813843
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 91.58729910850525,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.59740424156189
+            },
+            "0.4": {
+              "recall@1": 92.6719605922699,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.18003368377686
+            },
+            "0.6": {
+              "recall@1": 93.2539701461792,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.49749994277954
+            },
+            "0.8": {
+              "recall@1": 93.59788298606873,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.68620824813843
+            },
+            "1.0": {
+              "recall@1": 93.38624477386475,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.58920764923096
+            },
+            "1.2": {
+              "recall@1": 93.09523701667786,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.43621444702148
+            }
+          }
+        },
+        {
+          "seed": 33,
+          "epoch": 10,
+          "train_loss": 0.004868639634517142,
+          "batches": 1894,
+          "epoch_seconds": 245.04377756800022,
+          "selected_lambda": 0.8,
+          "selection": {
+            "recall@1": 93.2539701461792,
+            "recall@5": 99.92063641548157,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.52748107910156
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 91.4550244808197,
+              "recall@5": 99.86772537231445,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.53284049034119
+            },
+            "0.4": {
+              "recall@1": 92.6455020904541,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.18356823921204
+            },
+            "0.6": {
+              "recall@1": 93.2539701461792,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.50676250457764
+            },
+            "0.8": {
+              "recall@1": 93.2539701461792,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.52748107910156
+            },
+            "1.0": {
+              "recall@1": 93.20105910301208,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.49220108985901
+            },
+            "1.2": {
+              "recall@1": 93.01587343215942,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.37536406517029
+            }
+          }
+        },
+        {
+          "seed": 33,
+          "epoch": 11,
+          "train_loss": 0.0035886491774220716,
+          "batches": 1894,
+          "epoch_seconds": 245.6201088279995,
+          "selected_lambda": 0.8,
+          "selection": {
+            "recall@1": 93.62434148788452,
+            "recall@5": 99.94708895683289,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.7179536819458
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 91.56084656715393,
+              "recall@5": 99.89417791366577,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.58857679367065
+            },
+            "0.4": {
+              "recall@1": 92.61904954910278,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.17562890052795
+            },
+            "0.6": {
+              "recall@1": 93.38624477386475,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.57818078994751
+            },
+            "0.8": {
+              "recall@1": 93.62434148788452,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.7179536819458
+            },
+            "1.0": {
+              "recall@1": 93.41269731521606,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.61654233932495
+            },
+            "1.2": {
+              "recall@1": 93.30688118934631,
+              "recall@5": 99.92063641548157,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.54644131660461
+            }
+          }
+        },
+        {
+          "seed": 33,
+          "epoch": 12,
+          "train_loss": 0.0028704647122375217,
+          "batches": 1894,
+          "epoch_seconds": 236.54373879000013,
+          "selected_lambda": 0.8,
+          "selection": {
+            "recall@1": 93.33333373069763,
+            "recall@5": 99.94708895683289,
+            "recall@10": 99.94708895683289,
+            "recall@20": 99.94708895683289,
+            "recall@50": 99.97354745864868,
+            "mAP": 96.56804203987122
+          },
+          "lambda_curve": {
+            "0.0": {
+              "recall@1": 89.02116417884827,
+              "recall@5": 99.78836178779602,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 94.06436681747437
+            },
+            "0.2": {
+              "recall@1": 91.40211343765259,
+              "recall@5": 99.86772537231445,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 95.50392627716064
+            },
+            "0.4": {
+              "recall@1": 92.43386387825012,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.08303308486938
+            },
+            "0.6": {
+              "recall@1": 93.06878447532654,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.41945362091064
+            },
+            "0.8": {
+              "recall@1": 93.33333373069763,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.56804203987122
+            },
+            "1.0": {
+              "recall@1": 93.20105910301208,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.50322794914246
+            },
+            "1.2": {
+              "recall@1": 93.14814805984497,
+              "recall@5": 99.94708895683289,
+              "recall@10": 99.94708895683289,
+              "recall@20": 99.94708895683289,
+              "recall@50": 99.97354745864868,
+              "mAP": 96.47236466407776
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "train_queries": 30294,
+  "selection_queries": 3780,
+  "confirmation_queries": 3780,
+  "negative_mining": "source_oracle",
+  "train_gallery_count": 561,
+  "protocol": "Source Train supervision only; target Test never used for selection"
+}
+
+===== EXTRACT_TARGET =====
+[提取] target_query: /home/allen/datasets/University-1652/test/query_drone
+[extract] query_drone 2000/37855
+[extract] query_drone 4000/37855
+[extract] query_drone 6000/37855
+[extract] query_drone 8000/37855
+[extract] query_drone 10000/37855
+[extract] query_drone 12000/37855
+[extract] query_drone 14000/37855
+[extract] query_drone 16000/37855
+[extract] query_drone 18000/37855
+[extract] query_drone 20000/37855
+[extract] query_drone 22000/37855
+[extract] query_drone 24000/37855
+[extract] query_drone 26000/37855
+[extract] query_drone 28000/37855
+[extract] query_drone 30000/37855
+[extract] query_drone 32000/37855
+[extract] query_drone 34000/37855
+[extract] query_drone 36000/37855
+[extract] query_drone 37855/37855
+[提取] target_gallery: /home/allen/datasets/University-1652/test/gallery_satellite
+[extract] gallery_satellite 951/951
+{
+  "target_query": {
+    "count": 37855,
+    "image_size": 224,
+    "patch_shape": [
+      196,
+      768
+    ],
+    "region_shape": [
+      5,
+      768
+    ],
+    "model": "dinov3_vitb16",
+    "checkpoint_sha256": "73cec8be7427c8655ceced13ce62f6e20a1fa90d1b4d4a550df17a1144081a7c",
+    "dinov3_source_commit": "d51437b5e494881a204e71ee8e8a17e471fdcada",
+    "input_directory": "/home/allen/datasets/University-1652/test/query_drone",
+    "region_forward": "fp32 DINOv3 patch tokens + 5-region GeM",
+    "patch_forward": "autocast fp16 DINOv3 x_norm_patchtokens",
+    "note": "不包含 ID 标签；图像路径供训练和最终评测阶段单独解析"
+  },
+  "target_gallery": {
+    "count": 951,
+    "image_size": 224,
+    "patch_shape": [
+      196,
+      768
+    ],
+    "region_shape": [
+      5,
+      768
+    ],
+    "model": "dinov3_vitb16",
+    "checkpoint_sha256": "73cec8be7427c8655ceced13ce62f6e20a1fa90d1b4d4a550df17a1144081a7c",
+    "dinov3_source_commit": "d51437b5e494881a204e71ee8e8a17e471fdcada",
+    "input_directory": "/home/allen/datasets/University-1652/test/gallery_satellite",
+    "region_forward": "fp32 DINOv3 patch tokens + 5-region GeM",
+    "patch_forward": "autocast fp16 DINOv3 x_norm_patchtokens",
+    "note": "不包含 ID 标签；图像路径供训练和最终评测阶段单独解析"
+  }
+}
+
+===== ALIGN_TARGET =====
+{
+  "query_count": 37855,
+  "gallery_count": 951,
+  "op_solves": 5,
+  "op_history": [
+    {
+      "iter": 0,
+      "pairs": 35793,
+      "orth_err": 0.0001952648162841797,
+      "gallery_used": 936,
+      "max_gallery_load": 55
+    },
+    {
+      "iter": 1,
+      "pairs": 35786,
+      "orth_err": 0.0001939535140991211,
+      "gallery_used": 896,
+      "max_gallery_load": 55
+    },
+    {
+      "iter": 2,
+      "pairs": 36025,
+      "orth_err": 0.0001957416534423828,
+      "gallery_used": 872,
+      "max_gallery_load": 55
+    },
+    {
+      "iter": 3,
+      "pairs": 36191,
+      "orth_err": 0.00019788742065429688,
+      "gallery_used": 853,
+      "max_gallery_load": 55
+    },
+    {
+      "iter": 4,
+      "pairs": 36272,
+      "orth_err": 0.00019657611846923828,
+      "gallery_used": 847,
+      "max_gallery_load": 55
+    }
+  ],
+  "orthogonal_error": 0.0001933574676513672,
+  "rank_steps": 600,
+  "rank_loss_trace": [
+    {
+      "step": 1,
+      "loss": 0.1374349445104599
+    },
+    {
+      "step": 101,
+      "loss": 0.08723142743110657
+    },
+    {
+      "step": 201,
+      "loss": 0.086138516664505
+    },
+    {
+      "step": 301,
+      "loss": 0.08362692594528198
+    },
+    {
+      "step": 401,
+      "loss": 0.07775314152240753
+    },
+    {
+      "step": 501,
+      "loss": 0.08184332400560379
+    },
+    {
+      "step": 600,
+      "loss": 0.08255603909492493
+    }
+  ],
+  "test_labels_read": false,
+  "output": "/home/allen/cvgl-work/independent_reproduction_20261113/results/target_descriptors.pt"
+}
+
+===== EVALUATE =====
+[rerank] 2000/37855
+[rerank] 4000/37855
+[rerank] 6000/37855
+[rerank] 8000/37855
+[rerank] 10000/37855
+[rerank] 12000/37855
+[rerank] 14000/37855
+[rerank] 16000/37855
+[rerank] 18000/37855
+[rerank] 20000/37855
+[rerank] 22000/37855
+[rerank] 24000/37855
+[rerank] 26000/37855
+[rerank] 28000/37855
+[rerank] 30000/37855
+[rerank] 32000/37855
+[rerank] 34000/37855
+[rerank] 36000/37855
+[rerank] 37855/37855
+{
+  "evaluation": "Historically Exposed Test Compatibility Evaluation — Not a Blind Test",
+  "query_count": 37855,
+  "gallery_count": 951,
+  "model_epoch": 7,
+  "seed": 22,
+  "selected_lambda": 1.2,
+  "metrics": {
+    "global_retrieval": {
+      "recall@1": 81.67745471000671,
+      "recall@5": 97.34249114990234,
+      "recall@10": 98.66860508918762,
+      "recall@20": 99.35543537139893,
+      "recall@50": 99.8018741607666,
+      "mAP": 88.73741030693054
+    },
+    "patch_reranking": {
+      "recall@1": 89.32241201400757,
+      "recall@5": 98.13234806060791,
+      "recall@10": 98.76634478569031,
+      "recall@20": 99.35543537139893,
+      "recall@50": 99.8018741607666,
+      "mAP": 93.3904230594635
+    }
+  },
+  "target_test_labels_used_for_training": false,
+  "warning": "此端到端流程不能冒称已独立重现历史 90.2681%，需在真实资产上实测。"
+}

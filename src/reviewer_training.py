@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import time
 from pathlib import Path
 
 import numpy as np
@@ -202,7 +203,7 @@ def train_source_reranker(dataset_root: Path, source_query: Path,
     tr = config["training"]
     split = split_source_ids(qlabels, seed=int(tr.get("split_seed", 20261110)),
                              selection_seed=int(tr.get("selection_seed", 20261111)))
-    if len(set(split["train"]) & set(split["selection"])) or len(set(split["selection"]) & set(split["confirmation"])):
+    if sum(map(len, split.values())) != len(set().union(*split.values())):
         raise AssertionError("源域地点拆分重叠")
     data = torch.load(descriptors_file, map_location="cpu", weights_only=True)
     if data["labels_read"] is not False or data["cfg"] != config["alignment"]:
@@ -216,7 +217,18 @@ def train_source_reranker(dataset_root: Path, source_query: Path,
     qv, gv = data["qv"].float(), data["rv"].float()
     pools = prepare_pools(source_query, source_gallery, qlabels, glabels, split,
                           tr, proxy_vectors=(qv, gv))
+    print(f"[train] pools ready: {len(pools['query_indices'])} queries, "
+          f"{pools['train_gallery_count']} galleries", flush=True)
     train_idx = pools["query_indices"]
+    train_ids = set(split["train"])
+    if any(qlabels[i] not in train_ids for i in train_idx):
+        raise AssertionError("训练查询超出 Train-Fit")
+    for qi, positive, hard, random in zip(
+            train_idx, pools["positive"], pools["hard_pool"], pools["random_pool"]):
+        label = qlabels[qi]
+        if glabels[positive] != label or any(
+                glabels[j] == label or glabels[j] not in train_ids for j in (*hard, *random)):
+            raise AssertionError("训练候选的地点或行号不符合 Train-Fit 协议")
     selection_ids = set(split["selection"])
     confirmation_ids = set(split["confirmation"])
     val_sel_rows = [i for i, label in enumerate(qlabels) if label in selection_ids]
@@ -225,6 +237,10 @@ def train_source_reranker(dataset_root: Path, source_query: Path,
         raise ValueError("源域 Val-Selection 或 Val-Confirmation 为空")
     output = Path(output)
     output.mkdir(parents=True, exist_ok=True)
+    pool_manifest = {key: value.tolist() if isinstance(value, np.ndarray) else value
+                     for key, value in pools.items()}
+    (output / "negative_pools.json").write_text(
+        json.dumps(pool_manifest, ensure_ascii=False), encoding="utf-8")
     (output / "source_split.json").write_text(
         json.dumps(split, indent=2, ensure_ascii=False), encoding="utf-8")
     qpatch = np.load(source_query / "patches.npy", mmap_mode="r", allow_pickle=False)
@@ -247,6 +263,8 @@ def train_source_reranker(dataset_root: Path, source_query: Path,
             optimizer, T_max=int(tr["epochs"]))
         run_history = []
         for epoch in range(1, int(tr["epochs"]) + 1):
+            started = time.monotonic()
+            print(f"[train] seed={seed} epoch={epoch}/{tr['epochs']}", flush=True)
             model.train()
             choices = sample_epoch(pools, epoch, tr)
             rng = np.random.RandomState(int(tr.get("data_seed", 20261111)) + epoch * 1009)
@@ -279,6 +297,9 @@ def train_source_reranker(dataset_root: Path, source_query: Path,
                 optimizer.step()
                 loss_sum += float(loss.detach())
                 batches += 1
+                if batches % 250 == 0 or batches == len(loader):
+                    print(f"[train] seed={seed} epoch={epoch} batch={batches}/{len(loader)} "
+                          f"loss={loss_sum / batches:.6f}", flush=True)
             scheduler.step()
             base_sel, cand, pair = score_candidates(
                 model, base, qpatch, gpatch, val_sel_rows,
@@ -287,6 +308,7 @@ def train_source_reranker(dataset_root: Path, source_query: Path,
                 base_sel, cand, pair, [qlabels[i] for i in val_sel_rows],
                 glabels, lambda_grid)
             record = {"seed": seed, "epoch": epoch, "train_loss": loss_sum / max(1, batches),
+                      "batches": batches, "epoch_seconds": time.monotonic() - started,
                       "selected_lambda": lam, "selection": metrics, "lambda_curve": curve}
             run_history.append(record)
             print(json.dumps({k: v for k, v in record.items() if k != "lambda_curve"},

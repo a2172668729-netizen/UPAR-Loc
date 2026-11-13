@@ -84,3 +84,21 @@ python3.10 -m venv .venv
 - [VFM-Loc 原论文](https://doi.org/10.1109/TGRS.2026.3748024)及[官方源码](https://github.com/DingLei14/VFM-Loc)
 - [University-1652](https://github.com/layumi/University1652-Baseline)
 - [Meta DINOv3](https://github.com/facebookresearch/dinov3)；仓库中附带推理所需的源码及 [Meta 许可证](../third_party/dinov3/LICENSE.md)
+
+## 本次完整验收的追溯材料
+
+在上游提交 `2efcfed6` 的全新克隆中，合入了与 [复现补丁](independent_reproduction_2026-11-13/audit/reproduction.patch) 一致的修订：隔离 B2 训练 TF32 对其他阶段的影响，增加训练集划分断言、进度日志、对齐中间证据和完整排序保存。这些修订已经通过正式全量运行与独立评分。配置未更改算法超参数，另修改了代码中已经过时的“尚未实测”提示文字。
+
+- 正式运行：2026-11-13 12:26:12–15:20:26（北京时间），2 小时 54 分 14 秒；实际使用 `--batch-size 4 --workers 2`。
+- 本次 J0：81.6775% Recall@1 / 88.7374% AP；完整 UPAR-Loc：**89.3224% / 93.3904%**。
+- 历史 J2：90.2681% / 94.0511%；端到端复现 PASS，历史精确数字复现 FAIL。
+- 源域选型 seed 22、epoch 7、λ=1.2；共 3 个 seed × 12 epoch。
+- 源域训练地点 561 / Selection 70 / Confirmation 70 互斥，但三组无标签图像共享源域全局 PCA/OP 拟合；模型训练与困难负例挖掘仅限 Train-Fit。目标 Test 仅在排名生成后用真值评分；历史上 Test 已暴露，因此不是盲测。
+
+[原始复现报告](independent_reproduction_2026-11-13/REPRODUCTION_REPORT.md) ·
+[正式指标](independent_reproduction_2026-11-13/results/final_metrics.json) ·
+[独立重算](independent_reproduction_2026-11-13/results/independent_metrics.json) ·
+[运行环境](independent_reproduction_2026-11-13/environment.txt) ·
+[修复说明](independent_reproduction_2026-11-13/FIXES.md)
+
+预训练权重、数据集、训练 checkpoint、中间特征和完整检索排名未上传；原始实验日志、JSON 记录与修订 diff 已存入本仓库作为可核验文档。原始复现报告中的“未提交和推送”指的是报告生成时的状态。

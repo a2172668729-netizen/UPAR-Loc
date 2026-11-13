@@ -1,0 +1,26 @@
+test_evaluate_uses_the_full_gallery_and_all_positives (test_portability.PortableEvaluationTests) ... ok
+test_explicit_ranking_is_used_when_scores_are_tied (test_portability.PortableEvaluationTests) ... ok
+test_relative_asset_path_resolves_from_config_directory (test_portability.PortableEvaluationTests) ... Checking weights: external asset.pt
+Checking weights: external asset.pt
+ok
+test_hard_negatives_exclude_positive_and_visual_duplicates (test_reproduction.FromScratchTests) ... ok
+test_region_extraction_matches_five_region_layout (test_reproduction.FromScratchTests) ... ok
+test_source_id_split_is_disjoint_and_stable (test_reproduction.FromScratchTests) ... ok
+test_tie_aware_inference_keeps_intended_candidate_order (test_reproduction.FromScratchTests) ... [rerank] 1/1
+ok
+test_university_layout_and_id_parse (test_reproduction.FromScratchTests) ... ok
+test_unlabeled_alignment_from_synthetic_features (test_reproduction.FromScratchTests) ... ok
+test_retrain_and_reload_into_target_evaluation (test_reviewer_smoke.ReviewerSmokeTest) ... [train] pools ready: 6 queries, 6 galleries
+[train] seed=33 epoch=1/1
+[train] seed=33 epoch=1 batch=3/3 loss=0.668794
+{"seed": 33, "epoch": 1, "train_loss": 0.6687935590744019, "batches": 3, "epoch_seconds": 0.07952451900007418, "selected_lambda": 0.6, "selection": {"recall@1": 0.0, "recall@5": 100.0, "mAP": 50.0}}
+[rerank] 3/3
+ok
+test_bundled_license_and_model_present (test_self_contained.SelfContainedTests) ... ok
+test_bundled_tiny_vit_forward (test_self_contained.SelfContainedTests) ... ok
+test_source_oracle_math (test_self_contained.SelfContainedTests) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.967s
+
+OK

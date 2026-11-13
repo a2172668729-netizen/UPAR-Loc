@@ -59,6 +59,10 @@ def main() -> int:
     )
     results = {}
     for stage in stage_order:
+        # Training opts into TF32 internally. Each stage starts from the same
+        # FP32 settings even when it follows training in a single process.
+        torch.backends.cuda.matmul.allow_tf32 = False
+        torch.backends.cudnn.allow_tf32 = False
         print(f"\n===== {stage.upper()} =====", flush=True)
         if stage.startswith("extract"):
             if args.weights is None:

@@ -1,0 +1,43 @@
+{
+  "train/drone": {
+    "count": 37854,
+    "locations": 701
+  },
+  "train/satellite": {
+    "count": 701,
+    "locations": 701
+  },
+  "test/query_drone": {
+    "count": 37855
+  },
+  "test/gallery_satellite": {
+    "count": 951
+  },
+  "source_partitions": {
+    "train": {
+      "locations": 561,
+      "queries": 30294
+    },
+    "selection": {
+      "locations": 70,
+      "queries": 3780
+    },
+    "confirmation": {
+      "locations": 70,
+      "queries": 3780
+    }
+  },
+  "source_satellite_exact_duplicate_id_groups": [
+    [
+      845,
+      854
+    ],
+    [
+      1016,
+      1065
+    ]
+  ],
+  "source_satellite_duplicate_groups_crossing_split": [],
+  "split_disjoint": true,
+  "target_labels_parsed": false
+}

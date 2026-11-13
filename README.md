@@ -65,3 +65,17 @@ python3.10 -m venv .venv
 ## 致谢与引用
 
 UPAR-Loc 建立在 [VFM-Loc](https://doi.org/10.1109/TGRS.2026.3748024)、[DINOv3](https://github.com/facebookresearch/dinov3) 和 [University-1652](https://github.com/layumi/University1652-Baseline) 之上。第三方 DINOv3 代码及许可证见 [third_party/dinov3](third_party/dinov3)。
+
+## 2026-11-13 独立复现证据与历史差异
+
+本次在 RTX 5060 / WSL2、独立 Python 虚拟环境中，从 University-1652 原图和 Meta 官方 DINOv3 ViT-B/16 权重端到端复现。**J0 Recall@1 / AP 为 81.6775% / 88.7374%；完整 UPAR-Loc 为 89.3224% / 93.3904%**，提升 **7.6450 / 4.6530 个百分点**，独立评分通过。源域选择 seed=22、epoch=7、λ=1.2；三种 seed 各训练 12 个 epoch。
+
+历史 J2 指标为 90.2681% / 94.0511%，本次**未精确复现历史值**，但完成了全流程重新训练与评分。这份结果属于 **Historically Exposed Test Compatibility Evaluation — Not a Blind Test**：既有研究曾多次观察该 Test；目标域无标签 PCA/OP 使用整个 Test 图像分布，方法属于 source-supervised、transductive target-label-free。论文对比因使用的监督协议不同，只能作参考。
+
+此处 AP/mAP 遵照 VFM-Loc 的实现；同一批排名若按 University-1652 原基准的梯形积分口径评测，J0/J2 mAP 则为 **85.2074% / 91.3564%**，两种评分定义不可混用。
+
+[完整复现报告](docs/independent_reproduction_2026-11-13/REPRODUCTION_REPORT.md) ·
+[独立评分](docs/independent_reproduction_2026-11-13/results/independent_metrics.json) ·
+[正式运行日志](docs/independent_reproduction_2026-11-13/logs/reproduce-all.log) ·
+[环境及权重哈希](docs/independent_reproduction_2026-11-13/environment.txt) ·
+[修复补丁](docs/independent_reproduction_2026-11-13/FIXES.md)

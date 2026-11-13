@@ -75,6 +75,11 @@ def fit_alignment(query_folder: Path, gallery_folder: Path, output: Path,
         "query_order_sha256": hashlib.sha256(json.dumps(qpaths).encode()).hexdigest(),
         "gallery_order_sha256": hashlib.sha256(json.dumps(gpaths).encode()).hexdigest(),
         "rotation": rotation.detach().float().cpu(),
+        "op_initial_rotation": op["R"].detach().float().cpu(),
+        "op_pseudo_pairs": {key: value.cpu() for key, value in op["pairs"].items()},
+        "pca": {key: projection[key].cpu() for key in (
+            "query_mean", "query_basis", "reference_mean", "reference_basis",
+            "shared_mean", "shared_basis", "weights")},
     }
     torch.save(payload, output)
     report = {
@@ -84,6 +89,7 @@ def fit_alignment(query_folder: Path, gallery_folder: Path, output: Path,
         "orthogonal_error": float((rotation.T @ rotation -
                                    torch.eye(len(rotation), device=rotation.device)).abs().max()),
         "rank_steps": 0 if tuned is None else tuned["steps"],
+        "rank_loss_trace": [] if tuned is None else tuned["losses"],
         "test_labels_read": False,
         "output": str(output),
     }
@@ -237,6 +243,9 @@ def infer_reranking(model: PatchCrossAttentionReranker, base: torch.Tensor,
         ).float().reshape(n, k)
         _, order = fuse_reorder_ranked(scores, candidates, pair, fusion_weight)
         results.append(order.cpu())
+        stop = start + n
+        if stop % 2000 == 0 or stop == len(query_indices):
+            print(f"[rerank] {stop}/{len(query_indices)}", flush=True)
     return torch.cat(results)
 
 
@@ -280,6 +289,10 @@ def evaluate_target(target_query: Path, target_gallery: Path, descriptors: Path,
     joint_order = infer_reranking(model, base, qpatch, gpatch, device=device,
                                   topk=int(config["reranking"]["topk"]),
                                   fusion_weight=selected_lambda)
+    output = Path(output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    for name, order in (("global", global_order), ("joint", joint_order)):
+        np.save(output.parent / f"{name}_ranking.npy", order.numpy().astype(np.int32))
     # 标签只在两种排名均已生成后打开（metadata 中不保存测试标签）。
     qlabels, glabels = image_ids(qpaths), image_ids(gpaths)
     scores = {
@@ -287,13 +300,13 @@ def evaluate_target(target_query: Path, target_gallery: Path, descriptors: Path,
         "patch_reranking": metrics_from_order(joint_order, qlabels, glabels),
     }
     report = {
-        "evaluation": "历史已暴露 University-1652 Test 兼容评测（不是盲测）",
+        "evaluation": "Historically Exposed Test Compatibility Evaluation — Not a Blind Test",
         "query_count": len(qlabels), "gallery_count": len(glabels),
         "model_epoch": state["epoch"], "seed": state["seed"],
         "selected_lambda": selected_lambda,
         "metrics": scores,
         "target_test_labels_used_for_training": False,
-        "warning": "此端到端流程不能冒称已独立重现历史 90.2681%，需在真实资产上实测。",
+        "warning": "University-1652 Test 已在历史实验中暴露，本次不是独立盲测；不得仅凭流程运行成功推定已精确复现历史指标，请以实际评分为准。",
     }
     output = Path(output)
     output.parent.mkdir(parents=True, exist_ok=True)

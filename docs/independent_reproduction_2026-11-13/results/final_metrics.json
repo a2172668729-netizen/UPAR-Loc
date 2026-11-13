@@ -1,0 +1,28 @@
+{
+  "evaluation": "Historically Exposed Test Compatibility Evaluation — Not a Blind Test",
+  "query_count": 37855,
+  "gallery_count": 951,
+  "model_epoch": 7,
+  "seed": 22,
+  "selected_lambda": 1.2,
+  "metrics": {
+    "global_retrieval": {
+      "recall@1": 81.67745471000671,
+      "recall@5": 97.34249114990234,
+      "recall@10": 98.66860508918762,
+      "recall@20": 99.35543537139893,
+      "recall@50": 99.8018741607666,
+      "mAP": 88.73741030693054
+    },
+    "patch_reranking": {
+      "recall@1": 89.32241201400757,
+      "recall@5": 98.13234806060791,
+      "recall@10": 98.76634478569031,
+      "recall@20": 99.35543537139893,
+      "recall@50": 99.8018741607666,
+      "mAP": 93.3904230594635
+    }
+  },
+  "target_test_labels_used_for_training": false,
+  "warning": "此端到端流程不能冒称已独立重现历史 90.2681%，需在真实资产上实测。"
+}

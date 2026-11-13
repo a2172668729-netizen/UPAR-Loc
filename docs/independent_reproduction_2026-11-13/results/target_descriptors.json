@@ -1,0 +1,76 @@
+{
+  "query_count": 37855,
+  "gallery_count": 951,
+  "op_solves": 5,
+  "op_history": [
+    {
+      "iter": 0,
+      "pairs": 35793,
+      "orth_err": 0.0001952648162841797,
+      "gallery_used": 936,
+      "max_gallery_load": 55
+    },
+    {
+      "iter": 1,
+      "pairs": 35786,
+      "orth_err": 0.0001939535140991211,
+      "gallery_used": 896,
+      "max_gallery_load": 55
+    },
+    {
+      "iter": 2,
+      "pairs": 36025,
+      "orth_err": 0.0001957416534423828,
+      "gallery_used": 872,
+      "max_gallery_load": 55
+    },
+    {
+      "iter": 3,
+      "pairs": 36191,
+      "orth_err": 0.00019788742065429688,
+      "gallery_used": 853,
+      "max_gallery_load": 55
+    },
+    {
+      "iter": 4,
+      "pairs": 36272,
+      "orth_err": 0.00019657611846923828,
+      "gallery_used": 847,
+      "max_gallery_load": 55
+    }
+  ],
+  "orthogonal_error": 0.0001933574676513672,
+  "rank_steps": 600,
+  "rank_loss_trace": [
+    {
+      "step": 1,
+      "loss": 0.1374349445104599
+    },
+    {
+      "step": 101,
+      "loss": 0.08723142743110657
+    },
+    {
+      "step": 201,
+      "loss": 0.086138516664505
+    },
+    {
+      "step": 301,
+      "loss": 0.08362692594528198
+    },
+    {
+      "step": 401,
+      "loss": 0.07775314152240753
+    },
+    {
+      "step": 501,
+      "loss": 0.08184332400560379
+    },
+    {
+      "step": 600,
+      "loss": 0.08255603909492493
+    }
+  ],
+  "test_labels_read": false,
+  "output": "/home/allen/cvgl-work/independent_reproduction_20261113/results/target_descriptors.pt"
+}
