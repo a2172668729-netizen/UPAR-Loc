@@ -108,15 +108,16 @@ def prepare_pools(query_dir: Path, gallery_dir: Path,
                         if glabels[int(g)] != label and visual_groups[int(g)] != pg]
             if not eligible:
                 raise ValueError(f"query={qi} 没有合规卫星负例")
+            # Round 4 B0 原始 hard pool 是最高相似的 10 个不同地点，
+            # Stage 5 再过滤视觉重复项；不能在挖掘时用第 11 名以后填满 10 个组。
+            top_ten = [int(grows[int(z)]) for z in ranking[offset]
+                       if glabels[int(grows[int(z)])] != label][:10]
             seen, hard = {pg}, []
-            for local_g in ranking[offset]:
-                g = int(grows[int(local_g)])
-                if glabels[g] == label or visual_groups[g] in seen:
+            for g in top_ten:
+                if visual_groups[g] in seen:
                     continue
                 hard.append(g)
                 seen.add(visual_groups[g])
-                if len(hard) == 10:
-                    break
             # 随机池只取 Train-Fit Gallery；按 visual group 不放回抽取。
             group_to_id = {}
             for g in eligible:
@@ -256,6 +257,8 @@ def train_source_reranker(dataset_root: Path, source_query: Path,
     winning_state = None
     for seed in seeds:
         set_seed(seed)
+        if device.startswith("cuda"):
+            torch.backends.cuda.matmul.allow_tf32 = True
         model = PatchCrossAttentionReranker().to(device)
         optimizer = torch.optim.AdamW(model.parameters(), lr=float(tr["lr"]),
                                       weight_decay=float(tr["weight_decay"]))
