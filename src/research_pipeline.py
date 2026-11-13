@@ -230,11 +230,11 @@ def infer_reranking(model: PatchCrossAttentionReranker, base: torch.Tensor,
         q = torch.from_numpy(np.array(query_patch[ids], dtype=np.float32)).to(device)
         g = torch.from_numpy(np.array(gallery_patch[candidates.cpu().numpy()], dtype=np.float32)).to(device)
         n = len(ids)
-        with torch.autocast("cuda", enabled=device.startswith("cuda")):
-            pair = model(
-                q[:, None].expand(-1, k, -1, -1).reshape(-1, *q.shape[1:]),
-                g.reshape(-1, *g.shape[-2:]),
-            ).float().reshape(n, k)
+        # 原 Round 7 的 B2 前向为 FP32；不启用 autocast。
+        pair = model(
+            q[:, None].expand(-1, k, -1, -1).reshape(-1, *q.shape[1:]),
+            g.reshape(-1, *g.shape[-2:]),
+        ).float().reshape(n, k)
         _, order = fuse_reorder_ranked(scores, candidates, pair, fusion_weight)
         results.append(order.cpu())
     return torch.cat(results)
@@ -242,110 +242,13 @@ def infer_reranking(model: PatchCrossAttentionReranker, base: torch.Tensor,
 
 def train_reranker(dataset_root: Path, source_query: Path, source_gallery: Path,
                    descriptors_file: Path, output: Path,
-                   config: dict, device: str = "cuda") -> dict:
-    """只读取 source Train 的地点标签，Val-Selection 用于 checkpoint 选择。"""
-    dataset_root = Path(dataset_root)
-    qpaths = read_paths(source_query)
-    gpaths = read_paths(source_gallery)
-    qlabels, glabels = image_ids(qpaths), image_ids(gpaths)
-    split = split_source_ids(qlabels, seed=int(config["training"]["split_seed"]))
-    if set(split["train"]) & set(split["selection"]) or set(split["selection"]) & set(split["confirmation"]):
-        raise AssertionError("源域地点拆分出现重叠")
-    data = torch.load(descriptors_file, map_location="cpu", weights_only=True)
-    if data["labels_read"] is not False:
-        raise ValueError("无标签拟合资产的来源标志异常")
-    if data["cfg"] != config["alignment"]:
-        raise ValueError("源域全局描述符的拟合参数与本次配置不同，请重跑 align")
-    if data["query_count"] != len(qpaths) or data["gallery_count"] != len(gpaths):
-        raise ValueError("全局描述符与源域图片顺序不匹配")
-    if data["query_order_sha256"] != hashlib.sha256(json.dumps(qpaths).encode()).hexdigest():
-        raise ValueError("查询图片顺序哈希不匹配")
-    if data["gallery_order_sha256"] != hashlib.sha256(json.dumps(gpaths).encode()).hexdigest():
-        raise ValueError("图库图片顺序哈希不匹配")
-    qv, gv = data["qv"], data["rv"]
-    digest = [pixel_digest(dataset_root / p) for p in gpaths]
-    tr = config["training"]
-    set_seed(int(tr["seed"]))
-    qidx, neg = mine_negatives(qv, gv, qlabels, glabels, digest, set(split["train"]),
-                               count=int(tr["negatives"]))
-    positives = [i for i in range(len(qlabels)) if qlabels[i] in set(split["selection"])]
-    confirms = [i for i in range(len(qlabels)) if qlabels[i] in set(split["confirmation"])]
-    if not positives or not confirms:
-        raise ValueError("源域 Selection 或 Confirmation 为空")
-    output = Path(output)
-    output.mkdir(parents=True, exist_ok=True)
-    (output / "source_split.json").write_text(json.dumps(split, indent=2), encoding="utf-8")
-    loader = DataLoader(
-        PatchPairs(source_query / "patches.npy", source_gallery / "patches.npy", qidx, neg),
-        batch_size=int(tr["batch_size"]), shuffle=True,
-        num_workers=int(tr["workers"]), pin_memory=device.startswith("cuda"),
-    )
-    qpatch = np.load(source_query / "patches.npy", mmap_mode="r", allow_pickle=False)
-    gpatch = np.load(source_gallery / "patches.npy", mmap_mode="r", allow_pickle=False)
-    model = PatchCrossAttentionReranker().to(device)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=float(tr["lr"]),
-                                  weight_decay=float(tr["weight_decay"]))
-    amp = device.startswith("cuda")
-    scaler = torch.amp.GradScaler("cuda", enabled=amp)
-    source_base = qv @ gv.T
-    history = []
-    best_score = (-float("inf"), -float("inf"))
-    best_epoch = 0
-    output_ckpt = output / "best.pt"
-    for epoch in range(1, int(tr["epochs"]) + 1):
-        model.train()
-        total_loss = 0.0
-        seen = 0
-        for q, g in loader:
-            q = q.to(device, non_blocking=True)
-            g = g.to(device, non_blocking=True)
-            b, options = g.shape[:2]
-            optimizer.zero_grad(set_to_none=True)
-            with torch.autocast("cuda", enabled=amp):
-                logits = model(
-                    q[:, None].expand(-1, options, -1, -1).reshape(-1, *q.shape[1:]),
-                    g.reshape(-1, *g.shape[-2:]),
-                ).reshape(b, options)
-                loss = F.cross_entropy(logits.float(), torch.zeros(b, dtype=torch.long, device=device))
-            scaler.scale(loss).backward()
-            scaler.unscale_(optimizer)
-            torch.nn.utils.clip_grad_norm_(model.parameters(), float(tr["grad_clip"]))
-            scaler.step(optimizer)
-            scaler.update()
-            total_loss += float(loss.detach()) * b
-            seen += b
-        val_order = infer_reranking(model, source_base, qpatch, gpatch, device=device,
-                    topk=int(config["reranking"]["topk"]),
-                    fusion_weight=float(config["reranking"]["weight"]),
-                    query_indices=positives)
-        metrics = metrics_from_order(val_order, [qlabels[i] for i in positives], glabels)
-        record = {"epoch": epoch, "train_loss": total_loss / max(1, seen),
-                  "selection_r1": metrics["recall@1"], "selection_map": metrics["mAP"]}
-        history.append(record)
-        print(json.dumps(record, ensure_ascii=False), flush=True)
-        key = (metrics["recall@1"], metrics["mAP"])
-        if key > best_score:
-            best_score, best_epoch = key, epoch
-            torch.save({"state_dict": model.state_dict(), "epoch": epoch,
-                        "seed": int(tr["seed"]), "training_config": tr,
-                        "selection": metrics, "split": split,
-                        "fusion_weight": float(config["reranking"]["weight"])}, output_ckpt)
-    best = torch.load(output_ckpt, map_location="cpu", weights_only=True)
-    model.load_state_dict(best["state_dict"])
-    confirmed_order = infer_reranking(model, source_base, qpatch, gpatch, device=device,
-                 topk=int(config["reranking"]["topk"]),
-                 fusion_weight=float(config["reranking"]["weight"]),
-                 query_indices=confirms)
-    confirmed = metrics_from_order(confirmed_order, [qlabels[i] for i in confirms], glabels)
-    report = {"best_epoch": best_epoch, "selection": best["selection"],
-              "confirmation": confirmed, "history": history,
-              "train_queries": len(qidx), "selection_queries": len(positives),
-              "confirmation_queries": len(confirms),
-              "model": "源域监督训练的双向 Patch Cross-Attention"}
-    (output / "train_report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2),
-                                                encoding="utf-8")
-    return report
-
+                   config: dict, device: str = "cuda",
+                   upstream: Path | None = None) -> dict:
+    """转发到 Round 7 原始协议 B2 训练器；源域监督，目标域不读标签。"""
+    from src.reviewer_training import train_source_reranker
+    return train_source_reranker(dataset_root, source_query, source_gallery,
+                                 descriptors_file, output, config,
+                                 device=device, upstream=upstream)
 
 def evaluate_target(target_query: Path, target_gallery: Path, descriptors: Path,
                     checkpoint: Path, output: Path,
@@ -365,8 +268,12 @@ def evaluate_target(target_query: Path, target_gallery: Path, descriptors: Path,
     base = data["qv"] @ data["rv"].T
     model = PatchCrossAttentionReranker().to(device)
     state = torch.load(checkpoint, map_location="cpu", weights_only=True)
-    if float(state["fusion_weight"]) != float(config["reranking"]["weight"]):
-        raise ValueError("源域选型时的融合权重与本次评测配置不同")
+    selected_lambda = float(state["selected_lambda"])
+    allowed = config["reranking"].get("lambda_grid")
+    if allowed is not None and selected_lambda not in list(map(float, allowed)):
+        raise ValueError("Checkpoint 的融合系数不在源域允许的 lambda 网格中")
+    if state["training_config"] != config["training"]:
+        raise ValueError("Checkpoint 的源域训练配置与当前设置不同，不允许混用")
     model.load_state_dict(state["state_dict"])
     model.eval()
     qpatch = np.load(target_query / "patches.npy", mmap_mode="r", allow_pickle=False)
@@ -374,7 +281,7 @@ def evaluate_target(target_query: Path, target_gallery: Path, descriptors: Path,
     global_order = torch.argsort(base, dim=1, descending=True, stable=True)
     joint_order = infer_reranking(model, base, qpatch, gpatch, device=device,
                                   topk=int(config["reranking"]["topk"]),
-                                  fusion_weight=float(config["reranking"]["weight"]))
+                                  fusion_weight=selected_lambda)
     # 标签只在两种排名均已生成后打开（metadata 中不保存测试标签）。
     qlabels, glabels = image_ids(qpaths), image_ids(gpaths)
     scores = {
@@ -385,6 +292,7 @@ def evaluate_target(target_query: Path, target_gallery: Path, descriptors: Path,
         "evaluation": "历史已暴露 University-1652 Test 兼容评测（不是盲测）",
         "query_count": len(qlabels), "gallery_count": len(glabels),
         "model_epoch": state["epoch"], "seed": state["seed"],
+        "selected_lambda": selected_lambda,
         "metrics": scores,
         "target_test_labels_used_for_training": False,
         "warning": "此端到端流程不能冒称已独立重现历史 90.2681%，需在真实资产上实测。",
