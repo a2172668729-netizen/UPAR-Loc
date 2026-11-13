@@ -65,22 +65,21 @@
 
 目标是从 **University-1652 原始数据集 + DINOv3 ViT-B/16 公开预训练权重**出发，自己完成特征提取、无标签对齐、重排序训练和最终评测，不需要下载我们旧实验的中间特征或模型权重。
 
-还需要公开的 [VFM-Loc 官方源码](https://github.com/DingLei14/VFM-Loc)（作为特征提取依赖），具体下载版本、环境安装和数据目录请看 [从头复现说明](docs/END_TO_END.md)。
+仓库已经包含 **DINOv3 ViT-B/16 推理代码**及必要的特征提取、PCA/OP 和重排序实现。无需额外克隆 VFM-Loc，也不需要历史训练权重；环境安装和数据目录见 [从头复现说明](docs/END_TO_END.md)。DINOv3 原始模块遵循 [Meta 许可](third_party/dinov3/LICENSE.md)。
 
 环境和依赖准备好后，运行：
 
 ```bash
 python reproduce.py all \
   --dataset /path/to/University-1652 \
-  --weights /path/to/dinov3_vitb16.pth \
-  --upstream upstream/VFM-Loc
+  --weights /path/to/dinov3_vitb16_pretrain_lvd1689m-73cec8be.pth
 ```
 
 程序会依次完成：
 
 **提取 DINOv3 特征 → 拟合无标签 PCA / OP → 训练局部重排序器 → 计算检索指标。**
 
-代码已通过 CPU 单元测试，但这一新端到端入口**尚未在真实数据和 GPU 上完成完整验收**，不能保证一运行就得到历史 90.27%。
+早期版本通过了 CPU 单元测试，但本次自包含改造尚未重新运行测试；这一新端到端入口**尚未在真实数据和 GPU 上完成完整验收**，不能保证一运行就得到历史 90.27%。
 
 如果已有此前冻结的实验资产，也可以用 [历史评测入口](evaluate_retrieval.py) 核对检索结果；两条流程及其输出不应混用。
 
@@ -90,6 +89,8 @@ python reproduce.py all \
 - **原论文源码：** [DingLei14/VFM-Loc](https://github.com/DingLei14/VFM-Loc)
 - **数据集：** [University-1652](https://github.com/layumi/University1652-Baseline)
 - **复现与环境：** [从原始图像完整复现](docs/END_TO_END.md)
+- **DINOv3 推理源码与许可证：** [third_party/dinov3](third_party/dinov3)
+- **独立复现实现：** [src/raw_pipeline.py](src/raw_pipeline.py)、[src/source_oracle.py](src/source_oracle.py)
 - **历史实验和评测细节：** [冻结资产复评说明](docs/REPRODUCTION.md)
 
 目前最值得继续验证的是：**局部重排序的提升能否在严格冻结选型、完整重训以及新数据集上稳定保持。**
