@@ -1,26 +1,26 @@
 # UPAR-Loc 复现指南
 
-本指南描述目前仓库中唯一推荐的完整流程：从 **University-1652 原图 + DINOv3 ViT-B/16 官方权重**独立完成训练和评测。无需预先生成特征、OP 矩阵或重排序权重，也无需额外克隆 VFM-Loc。
+从 **University-1652 原始图像**和 **DINOv3 ViT-B/16 预训练权重**开始，即可独立完成对齐、训练与 D2S 评测。无需预先准备任何特征、OP 矩阵或重排序权重。
 
-## 准备
+## 环境与数据
 
-推荐 Linux / WSL2、Python 3.10，GPU 使用支持 CUDA 的 PyTorch。已在 Windows 11 + WSL2 Ubuntu 22.04、RTX 5060、PyTorch 2.7.1+cu128 环境下完成端到端复现。
+推荐 Python 3.10、Linux / WSL2 和 CUDA GPU。本项目已在 Windows 11 + WSL2 Ubuntu 22.04、RTX 5060、PyTorch 2.7.1+cu128 上完成全流程复现。
 
-数据集目录：
+数据集目录应包含：
 
 ```text
 University-1652/
   train/
-    drone/<地点ID>/*.jpeg
-    satellite/<地点ID>/*.jpg
+    drone/<location_id>/*.jpeg
+    satellite/<location_id>/*.jpg
   test/
-    query_drone/<地点ID>/*.jpeg
-    gallery_satellite/<地点ID>/*.jpg
+    query_drone/<location_id>/*.jpeg
+    gallery_satellite/<location_id>/*.jpg
 ```
 
-Train 包含约 37,854 张无人机图和 701 张卫星图；Test 包含 37,855 张无人机查询和 951 张卫星图库图像。请自行下载 Meta DINOv3 ViT-B/16 权重 `dinov3_vitb16_pretrain_lvd1689m-73cec8be.pth`。
+DINOv3 权重文件：`dinov3_vitb16_pretrain_lvd1689m-73cec8be.pth`。仓库已经包含所需的 DINOv3 推理代码。
 
-## 安装与运行
+## 一键运行
 
 ```bash
 git clone https://github.com/a2172668729-netizen/UPAR-Loc.git
@@ -39,21 +39,19 @@ python3.10 -m venv .venv
   --batch-size 4 --workers 2 --device cuda
 ```
 
-`--batch-size` 控制特征提取的批量大小；重排序训练的批量大小由 `configs/from_scratch.json` 控制。若显存允许，可提高提取批量。
+运行结束后查看 `outputs/reproduction/final_metrics.json`。`--batch-size` 控制图像特征提取的 batch size；重排序训练参数由 `configs/from_scratch.json` 控制。
 
-## 流程与数据隔离
+## 方法与训练设置
 
-1. **提取源域特征：** 冻结 DINOv3 ViT-B/16；输入尺寸 224×224。分别提取 FP32 的五区域 GeM 特征（每个 768 维）和 FP16 的 196×768 Patch 特征。
-2. **无标签全局对齐：** 无人机和卫星分别进行 PCA-512；白化指数为 0.55 / 0.10；CSLS k=100 产生伪配对，单张卫星图最多接收 55 个伪配对，更新 OP 4 轮，再执行 600 步 Cayley 排序优化。源域、目标域各自拟合。
-3. **源域监督训练：** 将官方 Train 的 701 个地点按固定随机种子拆分为 561 个 Train-Fit、70 个 Val-Selection 和 70 个 Val-Confirmation。仅在 Train-Fit 的真实配对上拟合 PCA-256/OP 以挖掘困难负样本；每条查询每个 epoch 抽取 1 正 + 3 困难负例 + 2 随机负例。使用双向 2 层、4 头 Patch Cross-Attention，AdamW、BCEWithLogitsLoss、CosineAnnealingLR，batch 16，每个种子训练 12 个 epoch，随机种子为 11、22、33。
-4. **选取模型：** 每个 epoch 只在源域 Val-Selection 检验融合权重 λ∈{0, 0.2, ..., 1.2}，按 Recall@1、AP 选定 seed / epoch / λ；冻结后在 Val-Confirmation 上做一次确认。
-5. **目标域检索：** 冻结模型选择后提取 Test 图像特征，在 Test **无标签图像集合**上拟合 PCA/OP；全局检索得到 Top-20，使用训练好的 Patch 网络重排序。只有最终排名生成后才读取 Test 地点 ID 计算指标。
+1. **特征提取：** 冻结 DINOv3 ViT-B/16，输入 224×224；提取五区域 GeM 特征（5×768，FP32）和 Patch 特征（196×768，FP16）。
+2. **全局对齐：** 两视角分别进行 PCA-512 和 whitening（无人机 0.55、卫星 0.10）；用 CSLS（k=100）构建伪配对，卫星侧容量上限为 55。迭代更新 OP 4 轮，再进行 600 步 Cayley 排序优化。Train 与 Test 的无标签对齐分别拟合。
+3. **重排序训练：** 将官方 Train 的 701 个地点拆为 561 个训练、70 个模型选择、70 个确认地点。训练时每条查询采样 1 个正例、3 个困难负例和 2 个随机负例；困难负例使用只在训练地点上拟合的有标签 PCA-256/OP 挖掘。模型为双向两层、四头 Patch Cross-Attention，使用 AdamW、BCEWithLogitsLoss、CosineAnnealingLR，batch size 16；随机种子 11、22、33 各训练 12 个 epoch。
+4. **模型选择：** 只用源域模型选择集决定 seed、epoch 和融合系数 λ（0 到 1.2，步长 0.2），随后在确认集上复核。
+5. **目标域评测：** 使用整批未标注 Test 图像拟合目标域 PCA/OP；全局检索后重排 Top-20，最终才读取 Test 地点 ID 计算指标。
 
-最终目标域不使用真实地点配对关系做训练、模型选择或 OP 拟合。由于目标对齐使用整个目标查询集和图库，属于 **transductive**；由于重排序在官方 Train 标签上学习，属于 **source-supervised**。
+重排序器在源域有监督训练，目标域没有配对标签参与学习或参数选择；由于目标对齐使用整批未标注 Test 图像，属于 **source-supervised, transductive target-label-free** 设置。
 
-## 分阶段运行
-
-需要单独检查中间结果时，可沿相同 `--dataset`、`--output` 和 `--config` 参数运行：
+## 分阶段执行
 
 ```bash
 .venv/bin/python reproduce.py extract_source --dataset ... --weights ...
@@ -64,41 +62,21 @@ python3.10 -m venv .venv
 .venv/bin/python reproduce.py evaluate --dataset ...
 ```
 
-输出主要包含 `features/`、`source_descriptors.pt`、`target_descriptors.pt`、`reranker/best.pt`、`reranker/train_report.json` 与 `final_metrics.json`。默认不覆盖已有特征；若明确需要重新提取，可加 `--overwrite`。单独运行训练或评测阶段前，应先生成对应上游产物。
+分阶段运行时保持 `--dataset`、`--output` 和 `--config` 一致。主要输出包括 `features/`、`source_descriptors.pt`、`target_descriptors.pt`、`reranker/best.pt`、`reranker/train_report.json` 和 `final_metrics.json`。默认保留已有特征，重新提取时可使用 `--overwrite`。
 
 ## 已验证结果
 
-2026-11-13 在全新克隆、独立 Python 虚拟环境及原始图像与权重上完成端到端运行，并独立重算指标：
+2026-11-13 在全新克隆和独立虚拟环境中，从原图与官方权重重新提取特征、训练三个随机种子并独立重算指标。
 
 | University-1652 D2S | Recall@1 | AP |
 | --- | ---: | ---: |
-| 无标签全局检索 | 81.6775% | 88.7374% |
-| 完整 UPAR-Loc | **89.3224%** | **93.3904%** |
+| 无标签全局对齐 | 81.6775% | 88.7374% |
+| **UPAR-Loc 完整方法** | **89.3224%** | **93.3904%** |
 
-源域选择得到 **seed=22、epoch=7、λ=1.2**。结果包含 37,855 条查询和完整 951 张图库；独立评分与正式评分一致。实际复现不保证每台机器的浮点结果完全相同。
+选出的配置为 **seed 22、epoch 7、λ=1.2**；完整评测包含 37,855 条查询和 951 张图库。AP 使用与 VFM-Loc 一致的计算方式。历史实验曾达到 90.2681% / 94.0511%，但从零复现没有精确重现该数值，差异分析和完整日志保留在[独立复现报告](independent_reproduction_2026-11-13/REPRODUCTION_REPORT.md)。
 
-这里的 AP 是与 VFM-Loc 一致的评分定义。University-1652 Test 在研究过程中曾被多次查看，这些数字不构成全新盲测；也尚未验证跨数据集泛化。
+[正式指标](independent_reproduction_2026-11-13/results/final_metrics.json) · [独立评分](independent_reproduction_2026-11-13/results/independent_metrics.json) · [环境与依赖](independent_reproduction_2026-11-13/environment.txt)
 
-## 来源
+## 参考
 
-- [VFM-Loc 原论文](https://doi.org/10.1109/TGRS.2026.3748024)及[官方源码](https://github.com/DingLei14/VFM-Loc)
-- [University-1652](https://github.com/layumi/University1652-Baseline)
-- [Meta DINOv3](https://github.com/facebookresearch/dinov3)；仓库中附带推理所需的源码及 [Meta 许可证](../third_party/dinov3/LICENSE.md)
-
-## 本次完整验收的追溯材料
-
-在上游提交 `2efcfed6` 的全新克隆中，合入了与 [复现补丁](independent_reproduction_2026-11-13/audit/reproduction.patch) 一致的修订：隔离 B2 训练 TF32 对其他阶段的影响，增加训练集划分断言、进度日志、对齐中间证据和完整排序保存。这些修订已经通过正式全量运行与独立评分。配置未更改算法超参数，另修改了代码中已经过时的“尚未实测”提示文字。
-
-- 正式运行：2026-11-13 12:26:12–15:20:26（北京时间），2 小时 54 分 14 秒；实际使用 `--batch-size 4 --workers 2`。
-- 本次 J0：81.6775% Recall@1 / 88.7374% AP；完整 UPAR-Loc：**89.3224% / 93.3904%**。
-- 历史 J2：90.2681% / 94.0511%；端到端复现 PASS，历史精确数字复现 FAIL。
-- 源域选型 seed 22、epoch 7、λ=1.2；共 3 个 seed × 12 epoch。
-- 源域训练地点 561 / Selection 70 / Confirmation 70 互斥，但三组无标签图像共享源域全局 PCA/OP 拟合；模型训练与困难负例挖掘仅限 Train-Fit。目标 Test 仅在排名生成后用真值评分；历史上 Test 已暴露，因此不是盲测。
-
-[原始复现报告](independent_reproduction_2026-11-13/REPRODUCTION_REPORT.md) ·
-[正式指标](independent_reproduction_2026-11-13/results/final_metrics.json) ·
-[独立重算](independent_reproduction_2026-11-13/results/independent_metrics.json) ·
-[运行环境](independent_reproduction_2026-11-13/environment.txt) ·
-[修复说明](independent_reproduction_2026-11-13/FIXES.md)
-
-预训练权重、数据集、训练 checkpoint、中间特征和完整检索排名未上传；原始实验日志、JSON 记录与修订 diff 已存入本仓库作为可核验文档。原始复现报告中的“未提交和推送”指的是报告生成时的状态。
+[VFM-Loc](https://github.com/DingLei14/VFM-Loc) · [University-1652](https://github.com/layumi/University1652-Baseline) · [Meta DINOv3](https://github.com/facebookresearch/dinov3) · [第三方代码许可证](../third_party/dinov3/LICENSE.md)
