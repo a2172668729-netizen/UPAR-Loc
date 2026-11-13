@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import sys
 from pathlib import Path
 
 import numpy as np
@@ -18,6 +17,7 @@ from torch.utils.data import DataLoader
 from src.correct_reranking import fuse_reorder_ranked, stable_topk_candidates
 from src.patch_attention import PatchCrossAttentionReranker
 from src.raw_pipeline import image_ids
+from src.source_oracle import source_train_vectors
 from src.research_pipeline import (PatchPairs, metrics_from_order, read_paths,
                                    set_seed, split_source_ids)
 
@@ -25,30 +25,15 @@ from src.research_pipeline import (PatchPairs, metrics_from_order, read_paths,
 def _source_oracle_features(query_dir: Path, gallery_dir: Path,
                             qlabels: list[int], glabels: list[int],
                             qrows: np.ndarray, grows: np.ndarray,
-                            upstream: Path) -> tuple[torch.Tensor, torch.Tensor]:
-    """Round 4 B0.3: 在 *Train-Fit* 数据上拟合原论文监督 PCA-256/OP 来挖难负例。
-
-    仅供源域监督训练阶段使用；与目标域无标签 V5 相互独立。
-    """
-    upstream = Path(upstream).resolve()
-    if not (upstream / "vfm_loc" / "training_free.py").is_file():
-        raise FileNotFoundError(f"缺少原论文公开源码：{upstream}")
-    if str(upstream) not in sys.path:
-        sys.path.insert(0, str(upstream))
-    from vfm_loc.training_free import fit_alignment_params, align_features
+                            ) -> tuple[torch.Tensor, torch.Tensor]:
+    """只在 Train-Fit 的源域真实地点配对上拟合 PCA-256 + OP，不依赖 VFM-Loc。"""
     q_all = np.load(query_dir / "regions.npy", mmap_mode="r", allow_pickle=False)
     g_all = np.load(gallery_dir / "regions.npy", mmap_mode="r", allow_pickle=False)
     q = torch.from_numpy(np.array(q_all[qrows], dtype=np.float32))
     g = torch.from_numpy(np.array(g_all[grows], dtype=np.float32))
-    ql = torch.tensor([qlabels[i] for i in qrows], dtype=torch.long)
-    gl = torch.tensor([glabels[i] for i in grows], dtype=torch.long)
-    cfg = {"alignment": {"use_procrustes": True, "pca_dim": 256, "rmac_alpha": 6.0},
-           "model": {"rmac_levels": [1, 2]}}
-    with torch.no_grad():
-        params = fit_alignment_params(q, g, ql, gl, cfg)
-        qv, gv = align_features(q, g, ql, gl, cfg, pretrained=params)
-    return qv.float().cpu(), gv.float().cpu()
-
+    ql = torch.tensor([qlabels[int(i)] for i in qrows], dtype=torch.long)
+    gl = torch.tensor([glabels[int(i)] for i in grows], dtype=torch.long)
+    return source_train_vectors(q, g, ql, gl, pca_dim=256, rmac_alpha=6.0)
 
 def _patch_visual_groups(gallery_dir: Path) -> list[str]:
     """旧版 Round 7 的视觉组：对冻结的 FP16 Patch bytes 做 SHA-256。"""
@@ -60,8 +45,7 @@ def _patch_visual_groups(gallery_dir: Path) -> list[str]:
 def prepare_pools(query_dir: Path, gallery_dir: Path,
                   qlabels: list[int], glabels: list[int],
                   split: dict, cfg: dict,
-                  *, upstream: Path | None,
-                  proxy_vectors: tuple[torch.Tensor, torch.Tensor] | None = None) -> dict:
+                  *, proxy_vectors: tuple[torch.Tensor, torch.Tensor] | None = None) -> dict:
     """训练数据仅使用 Train-Fit 地点。生成固定 hard/random 候选池，逐轮重新取样。"""
     train_ids = set(split["train"])
     qrows = np.flatnonzero(np.isin(qlabels, list(train_ids)))
@@ -76,10 +60,8 @@ def prepare_pools(query_dir: Path, gallery_dir: Path,
     positives = np.asarray([pos_by_label[qlabels[int(i)]] for i in qrows], dtype=np.int64)
     visual_groups = _patch_visual_groups(gallery_dir)
     if cfg.get("negative_mining", "source_oracle") == "source_oracle":
-        if upstream is None:
-            raise ValueError("原实验使用 source-oracle PCA/OP 挖难负例，必须传入 --upstream")
         qv, gv = _source_oracle_features(query_dir, gallery_dir, qlabels, glabels,
-                                         qrows, grows, upstream)
+                                         qrows, grows)
     elif cfg["negative_mining"] == "global_proxy_test_only":
         # 仅供没有真实 DINOv3 权重的 CPU 合成数据测试。不能作为论文复现路径。
         if proxy_vectors is None:
@@ -208,8 +190,7 @@ def choose_lambda(base: torch.Tensor, candidates: torch.Tensor,
 
 def train_source_reranker(dataset_root: Path, source_query: Path,
                           source_gallery: Path, descriptors_file: Path,
-                          output: Path, config: dict, *, device: str,
-                          upstream: Path | None = None) -> dict:
+                          output: Path, config: dict, *, device: str) -> dict:
     """完全从源域重新训练，复刻 B2 的采样、BCE、Cosine 和源域选型协议。
 
     Test 图像/标签没有参与任何采样、拟合、checkpoint 或 lambda 选择。
@@ -234,7 +215,7 @@ def train_source_reranker(dataset_root: Path, source_query: Path,
         raise ValueError("源域卫星图像路径顺序不符")
     qv, gv = data["qv"].float(), data["rv"].float()
     pools = prepare_pools(source_query, source_gallery, qlabels, glabels, split,
-                          tr, upstream=upstream, proxy_vectors=(qv, gv))
+                          tr, proxy_vectors=(qv, gv))
     train_idx = pools["query_indices"]
     selection_ids = set(split["selection"])
     confirmation_ids = set(split["confirmation"])
