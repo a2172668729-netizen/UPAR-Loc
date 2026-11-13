@@ -140,11 +140,13 @@ def extract_folder(folder: Path, output: Path, upstream: Path, weights: Path,
     offset = 0
     for batch in loader:
         batch = batch.to(device, non_blocking=True)
-        with torch.autocast("cuda", enabled=device.startswith("cuda")):
-            # 同一次 DINOv3 前向同时生成五区域特征和 Patch，避免两次前向不一致。
+        # Round 7 原始实验使用两次独立前向：区域特征来自 FP32，
+        # Patch token 来自 CUDA autocast FP16。混用 Patch 的 FP16 输出生成
+        # 区域特征会改变 PCA/OP 输入，不能宣称与历史 V5 相同。
+        reg = model(batch)
+        with torch.autocast("cuda", dtype=torch.float16, enabled=device.startswith("cuda")):
             outputs = model.model(batch, is_training=True)
             pt = outputs["x_norm_patchtokens"]
-            reg = _regions_from_tokens(pt)
         stop = offset + len(batch)
         if pt.shape[1:] != (196, 768):
             raise ValueError(f"异常 Patch 维度：{tuple(pt.shape)}")
@@ -161,6 +163,8 @@ def extract_folder(folder: Path, output: Path, upstream: Path, weights: Path,
         "checkpoint_sha256": sha256(weights),
         "upstream_expected_commit": UPSTREAM_COMMIT,
         "input_directory": str(folder.resolve()),
+        "region_forward": "fp32, VFM-Loc DinoV3Embedder.forward",
+        "patch_forward": "autocast fp16 DINOv3 x_norm_patchtokens",
         "note": "不包含 ID 标签；图像路径供训练和最终评测阶段单独解析",
     }
     result_paths["metadata"].write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
