@@ -22,7 +22,6 @@ def main() -> int:
         help="all 先完成并冻结源域训练，再接触目标域 Test 图片")
     parser.add_argument("--dataset", required=True, type=Path, help="University-1652 根目录")
     parser.add_argument("--weights", type=Path, help="官方 DINOv3 ViT-B/16 预训练权重")
-    parser.add_argument("--upstream", type=Path, help="固定版本 VFM-Loc 官方仓库")
     parser.add_argument("--output", type=Path, default=Path("outputs/reproduction"))
     parser.add_argument("--config", type=Path, default=Path("configs/from_scratch.json"))
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
@@ -62,8 +61,8 @@ def main() -> int:
     for stage in stage_order:
         print(f"\n===== {stage.upper()} =====", flush=True)
         if stage.startswith("extract"):
-            if args.weights is None or args.upstream is None:
-                parser.error("提取 DINOv3 特征必须提供 --weights 和 --upstream")
+            if args.weights is None:
+                parser.error("提取 DINOv3 特征必须提供 --weights")
             keys = (("source_query", "source_gallery") if stage.endswith("source")
                     else ("target_query", "target_gallery"))
             results[stage] = {}
@@ -71,7 +70,7 @@ def main() -> int:
                 folder = image_folders[key]
                 print(f"[提取] {key}: {folder}", flush=True)
                 results[stage][key] = extract_folder(
-                    folder, paths[key], args.upstream, args.weights,
+                    folder, paths[key], args.weights,
                     batch_size=args.batch_size, device=args.device,
                     workers=args.workers, overwrite=args.overwrite,
                 )
@@ -81,12 +80,10 @@ def main() -> int:
                 paths[f"{domain}_query"], paths[f"{domain}_gallery"],
                 out / f"{domain}_descriptors.pt", cfg, device=args.device)
         elif stage == "train":
-            if args.upstream is None and cfg["training"].get("negative_mining", "source_oracle") == "source_oracle":
-                parser.error("Round 7 的 source-oracle 负例挖掘必须提供 --upstream")
             results[stage] = train_reranker(
                 root, paths["source_query"], paths["source_gallery"],
                 out / "source_descriptors.pt", out / "reranker", cfg,
-                device=args.device, upstream=args.upstream)
+                device=args.device)
         elif stage == "evaluate":
             results[stage] = evaluate_target(
                 paths["target_query"], paths["target_gallery"],
