@@ -1,5 +1,5 @@
 {
-  "description": "Round 7 J2 复现实验配置；以本次源域重新选取 seed/epoch/lambda 为准，Test 已历史暴露，结果并非盲测；未经GPU复跑验收",
+  "description": "UPAR-Loc 完整复现配置：无标签跨视角对齐、源域监督 Patch 重排序及目标域 D2S 评测",
   "alignment": {
     "pca_dim": 512,
     "whiten_query": 0.55,

@@ -1,96 +1,67 @@
-# VFM-Loc 改进：无标签跨视角对齐与局部重排序
+# UPAR-Loc
 
-给一张无人机拍摄的照片，怎样从一堆卫星图中找到它对应的位置？
+**Unlabeled Pairing and Attention-based Reranking for Cross-View Geo-Localization**
 
-这是跨视角地理定位（Cross-View Geo-Localization，CVGL）要解决的问题。无人机和卫星拍摄的是同一个地方，但高度、视角、尺度差异很大：同一栋建筑可能看起来完全不同，不同地点却可能有相似的道路和建筑布局。
+UPAR-Loc 用无人机图像检索对应的卫星地点，重点解决两个问题：如何在**没有目标地点真实配对标签**的情况下对齐不同视角的特征，以及如何利用局部结构信息纠正全局检索中的排序错误。
 
-本项目基于 [VFM-Loc](https://github.com/DingLei14/VFM-Loc) 继续研究，重点改进了两件事：
+本项目基于 [VFM-Loc](https://github.com/DingLei14/VFM-Loc) 和冻结的 DINOv3 ViT-B/16 特征，提供从原始图像、预训练权重到训练与评测的完整实现。
 
-1. **不需要目标地点的真实配对标签，也能对齐无人机和卫星特征。**
-2. **不只比较整张图像的相似度，还检查局部区域是否匹配，把正确地点往前排。**
+## 方法
 
-我们保留原论文的 DINOv3 特征提取主干，主要改动发生在后面的**特征对齐**和**检索重排序**阶段。
+**1. 无标签跨视角对齐（Unlabeled Pairing）**
 
-## 与原论文相比，改了什么？
+无人机与卫星特征分别进行 PCA-512 和不同强度的白化，然后使用 CSLS 挖掘伪配对，通过迭代正交 Procrustes（OP）与无标签排序优化建立跨视角映射。目标域对齐只使用**无标签的查询图像与卫星图库**，不需要真实地点对应关系。由于拟合时使用目标域整批未标注图像，这是 *transductive* 设置。
 
-| | 原论文 VFM-Loc | 我们的改进 |
-| --- | --- | --- |
-| **视觉特征** | 冻结 DINOv3，使用 GeM / R-MAC 提取区域特征 | 基本保留，不重新训练 DINOv3 |
-| **PCA 降维** | 无人机、卫星分别进行 PCA，256 维 | 改为 **512 维**，并对两个视角采用不同强度的 Whitening |
-| **跨视角对齐** | 官方评测代码利用真实地点 ID 建立对应关系，再拟合正交变换（OP） | 从**无标签特征**中寻找伪配对，反复更新 OP；不使用目标域真实配对标签 |
-| **进一步优化** | 主要依赖 PCA + OP 后的全局相似度 | 增加 **600 步无标签排序优化**，直接改善检索特征 |
-| **最终检索** | 计算全局特征相似度并排序 | 先进行全局检索，再用**双向 Patch Cross-Attention** 重排 Top-20 候选 |
+**2. 基于注意力的局部重排序（Attention-based Reranking）**
 
-### 1. 无标签跨视角对齐
+先通过全局相似度检索 Top-20 卫星候选，再对无人机与卫星的 DINOv3 Patch 特征进行**双向 Cross-Attention** 匹配，融合局部与全局分数，调整候选顺序。
 
-原论文的 OP 可以理解为：找到无人机特征与卫星特征之间的坐标变换，让同一地点的两个向量靠近。但它的公开评测实现使用了地点标签来确定哪些向量应该配对。
+重排序网络在 University-1652 **官方 Train** 的地点 ID 上监督训练：每条查询使用 1 个正样本、3 个困难负样本和 2 个随机负样本。困难负样本挖掘使用仅在源域训练地点拟合的有标签 PCA/OP；这一步**不使用目标 Test 标签**。整个方法应表述为 **source-supervised, transductive target-label-free**，并非完全无监督或全流程 training-free。
 
-我们改为让模型先根据特征相似度**猜测哪些图像可能拍的是同一个地方**，再利用这些伪配对估计 OP。通过限制单张卫星图接收的伪配对数量、迭代更新，以及后续的排序优化，提高无标签对齐的效果。
+## 实验结果
 
-这样，目标测试地点即使没有人工标注的无人机—卫星对应关系，也能执行对齐。不过当前方法会使用目标域的**无标签图像集合**拟合参数，属于 *transductive* 设置。
+University-1652，**Drone → Satellite（D2S）**，官方 Test：37,855 张查询图像、951 张卫星图库图像。
 
-### 2. 基于局部 Patch 的重排序
-
-全局特征能快速筛出相似地点，却未必能分清外观很像的建筑群。于是我们在全局检索后增加了一个轻量模型：
-
-**无人机图像 → 全局检索 Top-20 卫星图 → 双向 Patch Cross-Attention 比较局部特征 → 重新排列候选。**
-
-双向 Cross-Attention 会同时考虑“无人机中的区域与卫星中的哪些区域相关”和“卫星中的区域与无人机中的哪些区域相关”。它不是简单地再算一次全图余弦相似度，而是学习两个视角之间更细的对应线索。
-
-这个重排序器在 **University-1652 的 Train 部分**使用地点标签训练，采用困难负例：除了正确卫星图，还让模型学习区分外观相似、但实际不属于同一地点的卫星图。
-
-所以需要明确：**全局对齐不使用目标域标签，但整个系统并非完全无监督，也不再是原论文意义上的全流程 training-free。**
-
-## 提升有多大？
-
-以下是 **University-1652，Drone → Satellite** 任务的历史实验对比。
-
-| 方法 | Recall@1 ↑ | mAP ↑ |
+| 方法 | Recall@1 ↑ | AP ↑ |
 | --- | ---: | ---: |
-| VFM-Loc 原论文报告 | 74.42% | 83.18% |
-| 我们的无标签全局对齐 | 81.75% | 88.78% |
-| 全局对齐 + Patch 重排序 | **90.27%** | **94.05%** |
+| VFM-Loc 论文报告（DINOv3） | 74.42% | 83.18% |
+| UPAR-Loc：无标签全局对齐 | 81.68% | 88.74% |
+| **UPAR-Loc：对齐 + Patch 重排序** | **89.32%** | **93.39%** |
 
-按照这组历史记录：
+以上 UPAR-Loc 数字来自 **2026-11-13 的完整独立复现**：从原始图像提取特征、拟合源域和目标域对齐，并以 3 个随机种子重新训练重排序网络，最终独立重算评测指标。重排序相比本次全局检索基线提升 **7.65 个百分点 Recall@1、4.65 个百分点 AP**。
 
-- **改进对齐**相对原论文：Recall@1 **+7.33** 个百分点，mAP **+5.60** 个百分点。
-- **加入局部重排序**相对我们的全局检索：Recall@1 **+8.51** 个百分点，mAP **+5.27** 个百分点。
-- **完整方法**相对原论文报告值：Recall@1 **+15.85** 个百分点，mAP **+10.87** 个百分点。
+AP 使用与 VFM-Loc 一致的评分定义。原论文公开评测实现使用目标评测地点标签拟合 OP，而 UPAR-Loc 不使用目标域真实配对标签，但增加了源域监督训练。因此表格是**同一基准测试上的结果对比**，不表示两者使用完全相同的监督条件。此前研究曾多次观察此 Test 结果，当前成绩不应称作独立盲测；跨数据集泛化尚待评估。
 
-重排序带来的提升尤其明显：它主要负责把已经进入前 20 名、却没排在第一的正确候选提上来。
+## 从零复现
 
-**实验状态说明：** 90.27% / 94.05% 来自此前冻结资产的历史测试记录，并非新整合训练代码重新跑出的结果。研究过程中已多次查看 University-1652 Test，且旧实验经历过协议和实现问题的审查；当前仓库修复了已发现的排序问题，但**修复后的最终指标尚待真实数据复测**。此前采用另一套源域选型协议的实验还报告过 88.65% Recall@1 / 93.19% mAP，两者配置不同，不能混在同一组消融实验中。上表因此用于说明已有的改进幅度，**不代表严格同协议、独立盲测的最终论文结果**。
+只需自行准备：
 
-## 怎样复现？
+- [University-1652](https://github.com/layumi/University1652-Baseline) 原始数据集；
+- Meta DINOv3 ViT-B/16 预训练权重（文件名：`dinov3_vitb16_pretrain_lvd1689m-73cec8be.pth`）。
 
-目标是从 **University-1652 原始数据集 + DINOv3 ViT-B/16 公开预训练权重**出发，自己完成特征提取、无标签对齐、重排序训练和最终评测，不需要下载我们旧实验的中间特征或模型权重。
-
-仓库已经包含 **DINOv3 ViT-B/16 推理代码**及必要的特征提取、PCA/OP 和重排序实现。无需额外克隆 VFM-Loc，也不需要历史训练权重；环境安装和数据目录见 [从头复现说明](docs/END_TO_END.md)。DINOv3 原始模块遵循 [Meta 许可](third_party/dinov3/LICENSE.md)。
-
-环境和依赖准备好后，运行：
+仓库包含所需 DINOv3 推理实现，无须克隆 VFM-Loc 或下载我们的实验缓存和训练权重。
 
 ```bash
-python reproduce.py all \
+git clone https://github.com/a2172668729-netizen/UPAR-Loc.git
+cd UPAR-Loc
+
+python3.10 -m venv .venv
+.venv/bin/python -m pip install --upgrade pip
+.venv/bin/python -m pip install \
+  --extra-index-url https://download.pytorch.org/whl/cu128 \
+  -r requirements-reproduction.txt
+
+.venv/bin/python reproduce.py all \
   --dataset /path/to/University-1652 \
-  --weights /path/to/dinov3_vitb16_pretrain_lvd1689m-73cec8be.pth
+  --weights /path/to/dinov3_vitb16_pretrain_lvd1689m-73cec8be.pth \
+  --output outputs/reproduction \
+  --batch-size 4 --workers 2 --device cuda
 ```
 
-程序会依次完成：
+程序依次完成：**源域特征与对齐 → 重排序训练与源域选型 → 目标域无标签对齐 → 完整 D2S 评测**。最终指标保存在 `outputs/reproduction/final_metrics.json`。硬件、随机性与计算设置可能使实际数值出现差异。
 
-**提取 DINOv3 特征 → 拟合无标签 PCA / OP → 训练局部重排序器 → 计算检索指标。**
+完整的数据目录、方法参数、训练协议与分阶段命令见 [复现说明](docs/END_TO_END.md)。
 
-早期版本通过了 CPU 单元测试，但本次自包含改造尚未重新运行测试；这一新端到端入口**尚未在真实数据和 GPU 上完成完整验收**，不能保证一运行就得到历史 90.27%。
+## 致谢与引用
 
-如果已有此前冻结的实验资产，也可以用 [历史评测入口](evaluate_retrieval.py) 核对检索结果；两条流程及其输出不应混用。
-
-## 相关资料
-
-- **原论文：** [VFM-Loc: Training-Free Cross-View Geo-Localization via Aligning Discriminative Visual Hierarchies](https://doi.org/10.1109/TGRS.2026.3748024)
-- **原论文源码：** [DingLei14/VFM-Loc](https://github.com/DingLei14/VFM-Loc)
-- **数据集：** [University-1652](https://github.com/layumi/University1652-Baseline)
-- **复现与环境：** [从原始图像完整复现](docs/END_TO_END.md)
-- **DINOv3 推理源码与许可证：** [third_party/dinov3](third_party/dinov3)
-- **独立复现实现：** [src/raw_pipeline.py](src/raw_pipeline.py)、[src/source_oracle.py](src/source_oracle.py)
-- **历史实验和评测细节：** [冻结资产复评说明](docs/REPRODUCTION.md)
-
-目前最值得继续验证的是：**局部重排序的提升能否在严格冻结选型、完整重训以及新数据集上稳定保持。**
+UPAR-Loc 建立在 [VFM-Loc](https://doi.org/10.1109/TGRS.2026.3748024)、[DINOv3](https://github.com/facebookresearch/dinov3) 和 [University-1652](https://github.com/layumi/University1652-Baseline) 之上。第三方 DINOv3 代码及许可证见 [third_party/dinov3](third_party/dinov3)。
