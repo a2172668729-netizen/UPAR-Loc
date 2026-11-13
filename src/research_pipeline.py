@@ -91,26 +91,31 @@ def fit_alignment(query_folder: Path, gallery_folder: Path, output: Path,
     return report
 
 
-def split_source_ids(labels: list[int], seed: int = 20261111) -> dict[str, list[int]]:
+def split_source_ids(labels: list[int], seed: int = 20261110,
+                     selection_seed: int = 20261111) -> dict[str, list[int]]:
+    """与原 Round 4 / Round 7 一致的两阶段源域地点划分。
+
+    先用 20261110 将官方 Train 的全部地点分成 80% Train-Fit / 20%
+    Val；再用 20261111 把 Val 140 个地点对半分成 Selection / Confirmation。
+    不允许一次随机打散后直接取 561/70/70，那样得到完全不同的地点。
+    """
     unique = np.array(sorted(set(labels)), dtype=np.int64)
     if len(unique) < 3:
         raise ValueError("训练地点不足，无法创建互斥拆分")
     rng = np.random.RandomState(seed)
-    rng.shuffle(unique)
-    if len(unique) == 701:
-        train_n, val_n = 561, 70
-    else:
-        train_n = max(1, int(len(unique) * .8))
-        val_n = max(1, int(len(unique) * .1))
-        if train_n + val_n >= len(unique):
-            train_n = len(unique) - 2
-            val_n = 1
+    perm = rng.permutation(len(unique))
+    n_val = int(round(0.2 * len(unique)))
+    n_val = max(2, min(n_val, len(unique) - 1))
+    train_ids = np.sort(unique[perm[n_val:]])
+    val_ids = np.sort(unique[perm[:n_val]])
+    rng_val = np.random.RandomState(selection_seed)
+    val_perm = rng_val.permutation(len(val_ids))
+    n_selection = len(val_ids) // 2
     return {
-        "train": sorted(map(int, unique[:train_n])),
-        "selection": sorted(map(int, unique[train_n:train_n + val_n])),
-        "confirmation": sorted(map(int, unique[train_n + val_n:])),
+        "train": train_ids.astype(int).tolist(),
+        "selection": np.sort(val_ids[val_perm[:n_selection]]).astype(int).tolist(),
+        "confirmation": np.sort(val_ids[val_perm[n_selection:]]).astype(int).tolist(),
     }
-
 
 def pixel_digest(path: Path) -> str:
     """对解码后的 RGB 像素做哈希，排除不同 ID 的逐像素重复卫星图。"""
