@@ -1,79 +1,95 @@
-# 跨视角地理定位：无标签对齐与局部重排序
+# VFM-Loc 改进：无标签跨视角对齐与局部重排序
 
-本项目研究 University-1652 **无人机图像 → 卫星图像** 的跨视角检索。使用冻结的 **DINOv3 ViT-B/16**，经过目标域**无标签全局特征对齐**，再使用在源域身份标签上训练的**双向 Patch Cross-Attention 重排序器**重新排列 Top-20 检索候选。
+给一张无人机拍摄的照片，怎样从一堆卫星图中找到它对应的位置？
 
-仓库包含两条相互独立的路径：
+这是跨视角地理定位（Cross-View Geo-Localization，CVGL）要解决的问题。无人机和卫星拍摄的是同一个地方，但高度、视角、尺度差异很大：同一栋建筑可能看起来完全不同，不同地点却可能有相似的道路和建筑布局。
 
-- **从原始图像完整运行**：输入 University-1652 数据集与 DINOv3 预训练权重，自行提取特征、拟合 PCA/OP、在源域训练重排序模型、最后测试。入口 [`reproduce.py`](reproduce.py)，协议见 [完整运行说明](docs/END_TO_END.md)。
-- **已有冻结资产的历史评测**：使用之前生成的描述符、Patch、重排序 checkpoint 复核历史实验。入口 [`evaluate_retrieval.py`](evaluate_retrieval.py)，协议见 [冻结资产复评说明](docs/REPRODUCTION.md)。
+本项目基于 [VFM-Loc](https://github.com/DingLei14/VFM-Loc) 继续研究，重点改进了两件事：
 
-## 从数据集与 DINOv3 权重出发
+1. **不需要目标地点的真实配对标签，也能对齐无人机和卫星特征。**
+2. **不只比较整张图像的相似度，还检查局部区域是否匹配，把正确地点往前排。**
 
-准备好 [University-1652 官方目录](https://github.com/layumi/University1652-Baseline) 和 DINOv3 ViT-B/16 checkpoint。官方 VFM-Loc 源码为**公开代码依赖**（无需任何额外训练权重），以下命令下载指定版本：
+我们保留原论文的 DINOv3 特征提取主干，主要改动发生在后面的**特征对齐**和**检索重排序**阶段。
 
-```bash
-git clone https://github.com/DingLei14/VFM-Loc.git upstream/VFM-Loc
-git -C upstream/VFM-Loc checkout 162d885d25f0215025d7fe9f0a1c70f64e7ba119
-python3.10 -m venv .venv
-.venv/bin/python -m pip install --extra-index-url https://download.pytorch.org/whl/cu128 -r requirements-reproduction.txt
-```
+## 与原论文相比，改了什么？
 
-完整运行命令：
-
-```bash
-.venv/bin/python reproduce.py all \
-  --dataset /path/to/University-1652 \
-  --weights /path/to/dinov3_vitb16_pretrain_lvd1689m-73cec8be.pth \
-  --upstream upstream/VFM-Loc \
-  --output outputs/reproduction
-```
-
-内部执行：原图特征提取 → 源域/目标域无标签 PCA+OP → 源域有监督重排序训练与模型选型 → 对 Test 一次性评测。也可执行 `extract`、`align`、`train`、`evaluate` 四个阶段，按需检查每一阶段输出。默认参数在 [`configs/from_scratch.json`](configs/from_scratch.json)。
-
-**请不要将上述全新训练流程等同于已确认复现历史的 90.2681%**：原先的全部训练源码、采样细节和产物尚未独立核对；当前新流程是依据可取得的源域协议重新整理的实现，尚未在原始数据和 GPU 上跑完。每个阶段的日志和结果会保存到指定 output 目录。
-
-## 实验方法
-
-| 模块 | 具体作用 | 使用标签情况 |
+| | 原论文 VFM-Loc | 我们的改进 |
 | --- | --- | --- |
-| DINOv3 特征提取 | 五区域 GeM/R-MAC 与 196 个 Patch token | 不使用地点标签 |
-| 全局无标签对齐 | 独立 PCA-512、CSLS 伪配对、OP、600 步 Cayley 优化 | 目标域和源域拟合均不读标签 |
-| 双向 Patch Cross-Attention | 对初排前 20 张卫星图重新排序 | **源域训练使用**地点标签 |
-| University-1652 Test | Recall@1 / Recall@5 / mAP 等 | 只在生成排名后计算指标 |
+| **视觉特征** | 冻结 DINOv3，使用 GeM / R-MAC 提取区域特征 | 基本保留，不重新训练 DINOv3 |
+| **PCA 降维** | 无人机、卫星分别进行 PCA，256 维 | 改为 **512 维**，并对两个视角使用不同程度的白化 |
+| **跨视角对齐** | 官方评测代码利用真实地点 ID 建立对应关系，再拟合正交变换（OP） | 从**无标签特征**中寻找伪配对，反复更新 OP；不使用目标域真实配对标签 |
+| **进一步优化** | 主要依赖 PCA + OP 后的全局相似度 | 增加 **600 步无标签排序优化**，直接改善检索特征 |
+| **最终检索** | 计算全局特征相似度并排序 | 先进行全局检索，再用**双向 Patch Cross-Attention** 重排 Top-20 候选 |
 
-这里的“无标签”特指**目标域特征对齐**；整个系统是*源域监督训练 + 目标域无标签适配*，不能称为完全无监督或全流程 training-free。
+### 1. 无标签跨视角对齐
 
-## 历史冻结资产记录（仅作对照）
+原论文的 OP 可以理解为：找到无人机特征与卫星特征之间的坐标变换，让同一地点的两个向量靠近。但它的公开评测实现使用了地点标签来确定哪些向量应该配对。
 
-| 系统 | Recall@1 | mAP |
+我们改为让模型先根据特征相似度**猜测哪些图像可能拍的是同一个地方**，再利用这些伪配对估计 OP。通过限制单张卫星图接收的伪配对数量、迭代更新，以及后续的排序优化，提高无标签对齐的效果。
+
+这样，目标测试地点即使没有人工标注的无人机—卫星对应关系，也能执行对齐。不过当前方法会使用目标域的**无标签图像集合**拟合参数，属于 *transductive* 设置。
+
+### 2. 基于局部 Patch 的重排序
+
+全局特征能快速筛出相似地点，却未必能分清外观很像的建筑群。于是我们在全局检索后增加了一个轻量模型：
+
+**无人机图像 → 全局检索 Top-20 卫星图 → 双向 Patch Cross-Attention 比较局部特征 → 重新排列候选。**
+
+双向 Cross-Attention 会同时考虑“无人机中的区域与卫星中的哪些区域相关”和“卫星中的区域与无人机中的哪些区域相关”。它不是简单地再算一次全图余弦相似度，而是学习两个视角之间更细的对应线索。
+
+这个重排序器在 **University-1652 的 Train 部分**使用地点标签训练，采用困难负例：除了正确卫星图，还让模型学习区分外观相似、但实际不属于同一地点的卫星图。
+
+所以需要明确：**全局对齐不使用目标域标签，但整个系统并非完全无监督，也不再是原论文意义上的全流程 training-free。**
+
+## 提升有多大？
+
+以下是 **University-1652，Drone → Satellite** 任务的历史实验对比。
+
+| 方法 | Recall@1 ↑ | mAP ↑ |
 | --- | ---: | ---: |
-| 全局检索基线 | 81.7541% | 88.7828% |
-| 全局检索 + 局部重排序 | **90.2681%** | **94.0511%** |
+| VFM-Loc 原论文报告 | 74.42% | 83.18% |
+| 我们的无标签全局对齐 | 81.75% | 88.78% |
+| 全局对齐 + Patch 重排序 | **90.27%** | **94.05%** |
 
-这些是**此前冻结资产的历史 Test 兼容评测指标**，不是新代码重跑出来的结果。Test 已在研究过程中多次暴露，不属于独立盲测。仓库现已使用确定性同分排名修复历史排序边界问题，新结果必须从代码实测得出，不预填上述成绩。
+按照这组历史记录：
 
-## 目录导航
+- **改进对齐**相对原论文：Recall@1 **+7.33** 个百分点，mAP **+5.60** 个百分点。
+- **加入局部重排序**相对我们的全局检索：Recall@1 **+8.51** 个百分点，mAP **+5.27** 个百分点。
+- **完整方法**相对原论文报告值：Recall@1 **+15.85** 个百分点，mAP **+10.87** 个百分点。
 
-| 文件 | 用途 |
-| --- | --- |
-| [`reproduce.py`](reproduce.py) | 完整流水线的命令行入口 |
-| [`src/raw_pipeline.py`](src/raw_pipeline.py) | 从图片生成区域、Patch 特征以及严格的图片顺序记录 |
-| [`src/research_pipeline.py`](src/research_pipeline.py) | 无标签拟合、困难负例、训练与最终评测 |
-| [`src/op_core.py`](src/op_core.py) | PCA/CSLS/OP/Cayley 算法 |
-| [`src/patch_attention.py`](src/patch_attention.py) | 双向 Cross-Attention 模型 |
-| [`src/correct_reranking.py`](src/correct_reranking.py) | 修复后的候选身份重排、同分确定性排名 |
-| [`evaluate_retrieval.py`](evaluate_retrieval.py) | 旧冻结资产复评入口 |
-| [`docs/END_TO_END.md`](docs/END_TO_END.md) | 从头运行协议、硬件与结果限制 |
+重排序带来的提升尤其明显：它主要负责把已经进入前 20 名、却没排在第一的正确候选提上来。
 
-## 代码自检
+**实验状态说明：** 90.27% / 94.05% 来自此前冻结资产的历史测试记录，并非新整合训练代码重新跑出的结果。研究过程中已多次查看 University-1652 Test，且旧实验经历过协议和实现问题的审查；当前仓库修复了已发现的排序问题，但**修复后的最终指标尚待真实数据复测**。此前采用另一套源域选型协议的实验还报告过 88.65% Recall@1 / 93.19% mAP，两者配置不同，不能混在同一组消融实验中。上表因此用于说明已有的改进幅度，**不代表严格同协议、独立盲测的最终论文结果**。
+
+## 怎样复现？
+
+目标是从 **University-1652 原始数据集 + DINOv3 ViT-B/16 公开预训练权重**出发，自己完成特征提取、无标签对齐、重排序训练和最终评测，不需要下载我们旧实验的中间特征或模型权重。
+
+还需要公开的 [VFM-Loc 官方源码](https://github.com/DingLei14/VFM-Loc)（作为特征提取依赖），具体下载版本、环境安装和数据目录请看 [从头复现说明](docs/END_TO_END.md)。
+
+环境和依赖准备好后，运行：
 
 ```bash
-.venv/bin/python -m compileall -q reproduce.py evaluate_retrieval.py src tests
-.venv/bin/python tests/test_reranking.py
-.venv/bin/python -m unittest discover -s tests -p test_portability.py
-.venv/bin/python -m unittest discover -s tests -p test_reproduction.py
+python reproduce.py all \
+  --dataset /path/to/University-1652 \
+  --weights /path/to/dinov3_vitb16.pth \
+  --upstream upstream/VFM-Loc
 ```
 
-仓库在 GitHub Actions 上设置了 CPU 单元测试；CPU 测试不代表 DINOv3 权重加载、CUDA 训练与全量数据实验已经验收。
+程序会依次完成：
 
-详细说明与无法从旧记录证明的部分见 [完整运行说明](docs/END_TO_END.md)。
+**提取 DINOv3 特征 → 拟合无标签 PCA / OP → 训练局部重排序器 → 计算检索指标。**
+
+代码已通过 CPU 单元测试，但这一新端到端入口**尚未在真实数据和 GPU 上完成完整验收**，不能保证一运行就得到历史 90.27%。
+
+如果已有此前冻结的实验资产，也可以用 [历史评测入口](evaluate_retrieval.py) 核对检索结果；两条流程及其输出不应混用。
+
+## 相关资料
+
+- **原论文：** [VFM-Loc: Training-Free Cross-View Geo-Localization via Aligning Discriminative Visual Hierarchies](https://doi.org/10.1109/TGRS.2026.3748024)
+- **原论文源码：** [DingLei14/VFM-Loc](https://github.com/DingLei14/VFM-Loc)
+- **数据集：** [University-1652](https://github.com/layumi/University1652-Baseline)
+- **复现与环境：** [从原始图像完整复现](docs/END_TO_END.md)
+- **历史实验和评测细节：** [冻结资产复评说明](docs/REPRODUCTION.md)
+
+目前最值得继续验证的是：**局部重排序的提升能否在严格冻结选型、完整重训以及新数据集上稳定保持。**
